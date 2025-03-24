@@ -86,7 +86,7 @@ export default function RegisterScreen() {
   return (
     <ScrollView style={styles.container}>
       <Text variant="h4" style={styles.title}>
-        Register as {selectedRole === 'MILKMAN' ? 'Milkman' : 'Customer'}
+        Register as {selectedRole === 'MILKMAN' ? 'MILKMAN' : 'CUSTOMER'}
       </Text>
       
       <Surface elevation={2} category="medium" style={styles.form}>

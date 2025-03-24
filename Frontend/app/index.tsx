@@ -3,7 +3,7 @@ import { Text, Button, Surface } from "@react-native-material/core";
 import { router } from 'expo-router';
 
 export default function LandingPage() {
-  const handleRoleSelect = (role: 'milkman' | 'customer') => {
+  const handleRoleSelect = (role: 'MILKMAN' | 'CUSTOMER') => {
     router.push(`/auth/login?role=${role}`);
   };
 
@@ -25,7 +25,7 @@ export default function LandingPage() {
           variant="contained"
           color="#2196F3"
           tintColor="#fff"
-          onPress={() => handleRoleSelect('milkman')}
+          onPress={() => handleRoleSelect('MILKMAN')}
           // style={styles.button}
           uppercase={false}
         />
@@ -35,7 +35,7 @@ export default function LandingPage() {
           variant="contained"
           color="#2196F3"
           tintColor="#fff"
-          onPress={() => handleRoleSelect('customer')}
+          onPress={() => handleRoleSelect('CUSTOMER')}
           // style={styles.button}
           uppercase={false}
         />
