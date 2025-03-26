@@ -31,6 +31,18 @@ const useUserManagement = () => {
     });
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      // Get the token from AsyncStorage
+      await AsyncStorage.removeItem('jwtToken');
+    // Optionally clear other user state or cached data here
+    Alert.alert('Success', 'Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert('Error', 'Failed to log out. Please try again.');
+    }
+  };
+
   const handleLogin = useCallback(async (data?: User) => {
     try {
       const submitData = data || formData;
@@ -39,20 +51,20 @@ const useUserManagement = () => {
         Alert.alert('Validation Error', 'Please enter both phone and password');
         return;
       }
-      
+      // console.log(submitData);
       const response = await axios.post(`${API_URL}/api/auth/login`, {
         username: submitData.phoneNumber, // assuming phone acts as the username, or adjust accordingly
         password :submitData.password,
       });
       const token = response.data.token;
-      console.log(response.data.authorities[0]);
+      // console.log(response.data.authorities[0].authority);
       
       if (token) {
         // Store the token for later API calls.
         await AsyncStorage.setItem('jwtToken', token);
         // Optionally, you can also store other user details if provided.
         Alert.alert('Success', 'Login successful');
-        router.replace(`/home?role=${'response.data.authorities[0].authority'}`);
+        router.replace(`/home?role=${response.data.authorities[0].authority}`);
       } else {
         Alert.alert('Login Failed', 'No token received');
       }
@@ -108,6 +120,7 @@ const useUserManagement = () => {
     setFormData,
     handleSubmit,
     handleLogin,
+    handleLogout,
   };
 };
 

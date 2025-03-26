@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Text, TextInput, Button, Surface } from "@react-native-material/core";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { Text, TextInput, Button, Surface } from 'react-native-paper';
 import useUserManagement from '../hooks/useUserManagement';
 import { User } from '../types';
-
 
 export default function LoginScreen() {
   const { role } = useLocalSearchParams();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const { users, handleLogin } = useUserManagement();
+  const { handleLogin } = useUserManagement();
 
   const handleSubmit = () => {
     // TODO: Implement actual login logic with API
-    // For now, just simulate successful login
     const newUser: User = {
       name: '',
       phoneNumber: phone,
@@ -30,17 +27,17 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text variant="h4" style={styles.title}>
+      <Text variant="headlineMedium" style={styles.title}>
         Login as {role === 'MILKMAN' ? 'MILKMAN' : 'CUSTOMER'}
       </Text>
       
-      <Surface elevation={2} category="medium" style={styles.form}>
+      <Surface elevation={2} style={styles.form}>
         <TextInput
           label="Phone Number"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
-          leading={props => <Icon name="phone" {...props} />}
+          left={<TextInput.Icon icon="phone" />}
           style={styles.input}
         />
 
@@ -49,28 +46,29 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          leading={props => <Icon name="lock" {...props} />}
+          left={<TextInput.Icon icon="lock" />}
           style={styles.input}
         />
 
         <Button
-          title="Login"
-          variant="contained"
-          color="#2196F3"
-          tintColor="#fff"
+          mode="contained"
+          buttonColor="#2196F3"
           onPress={handleSubmit}
           style={styles.loginButton}
           uppercase={false}
-        />
+        >
+          Login
+        </Button>
 
         <Button
-          title="Go Back"
-          variant="outlined"
-          color="#666"
+          mode="outlined"
+          textColor="#666"
           onPress={() => router.back()}
           style={styles.backButton}
           uppercase={false}
-        />
+        >
+          Go Back
+        </Button>
       </Surface>
     </View>
   );
@@ -91,16 +89,18 @@ const styles = StyleSheet.create({
   form: {
     padding: 20,
     borderRadius: 12,
-    gap: 20,
+    // Using marginBottom on children for spacing is a safe alternative to gap.
   },
   input: {
     backgroundColor: 'transparent',
+    marginBottom: 20,
   },
   loginButton: {
     height: 45,
     marginTop: 10,
+    marginBottom: 10,
   },
   backButton: {
     height: 45,
   },
-}); 
+});

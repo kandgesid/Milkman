@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { Text, TextInput, Button, Surface } from "@react-native-material/core";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { Text, TextInput, Button, Surface } from 'react-native-paper';
 import useUserManagement from '../hooks/useUserManagement';
 import { User } from '../types';
 
@@ -16,7 +15,7 @@ interface FormData {
 }
 
 export default function RegisterScreen() {
-  const { users, handleSubmit } = useUserManagement();
+  const { handleSubmit } = useUserManagement();
   const [selectedRole, setSelectedRole] = useState<'MILKMAN' | 'CUSTOMER' | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -47,37 +46,39 @@ export default function RegisterScreen() {
   if (!selectedRole) {
     return (
       <View style={styles.container}>
-        <Text variant="h4" style={styles.title}>Register as</Text>
-        
-        <Surface elevation={2} category="medium" style={styles.roleContainer}>
+        <Text variant="headlineMedium" style={styles.title}>
+          Register as
+        </Text>
+        <Surface elevation={2} style={styles.roleContainer}>
           <Button
-            title="🧑‍🌾 Milkman"
-            variant="contained"
-            color="#2196F3"
-            tintColor="#fff"
+            mode="contained"
+            buttonColor="#2196F3"
             onPress={() => setSelectedRole('MILKMAN')}
             style={styles.roleButton}
             uppercase={false}
-          />
+          >
+            🧑‍🌾 Milkman
+          </Button>
 
           <Button
-            title="🧑 Customer"
-            variant="contained"
-            color="#2196F3"
-            tintColor="#fff"
+            mode="contained"
+            buttonColor="#2196F3"
             onPress={() => setSelectedRole('CUSTOMER')}
             style={styles.roleButton}
             uppercase={false}
-          />
+          >
+            🧑 Customer
+          </Button>
 
           <Button
-            title="Go Back"
-            variant="outlined"
-            color="#666"
+            mode="outlined"
+            textColor="#666"
             onPress={() => router.back()}
             style={styles.backButton}
             uppercase={false}
-          />
+          >
+            Go Back
+          </Button>
         </Surface>
       </View>
     );
@@ -85,16 +86,16 @@ export default function RegisterScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text variant="h4" style={styles.title}>
+      <Text variant="headlineMedium" style={styles.title}>
         Register as {selectedRole === 'MILKMAN' ? 'MILKMAN' : 'CUSTOMER'}
       </Text>
       
-      <Surface elevation={2} category="medium" style={styles.form}>
+      <Surface elevation={2} style={styles.form}>
         <TextInput
           label="Full Name"
           value={formData.name}
           onChangeText={(value) => updateFormData('name', value)}
-          leading={props => <Icon name="account" {...props} />}
+          left={<TextInput.Icon icon="account" />}
           style={styles.input}
         />
 
@@ -103,7 +104,7 @@ export default function RegisterScreen() {
           value={formData.phone}
           onChangeText={(value) => updateFormData('phone', value)}
           keyboardType="phone-pad"
-          leading={props => <Icon name="phone" {...props} />}
+          left={<TextInput.Icon icon="phone" />}
           style={styles.input}
         />
 
@@ -112,7 +113,7 @@ export default function RegisterScreen() {
           value={formData.email}
           onChangeText={(value) => updateFormData('email', value)}
           keyboardType="email-address"
-          leading={props => <Icon name="email" {...props} />}
+          left={<TextInput.Icon icon="email" />}
           style={styles.input}
         />
 
@@ -121,7 +122,7 @@ export default function RegisterScreen() {
           value={formData.password}
           onChangeText={(value) => updateFormData('password', value)}
           secureTextEntry
-          leading={props => <Icon name="lock" {...props} />}
+          left={<TextInput.Icon icon="lock" />}
           style={styles.input}
         />
 
@@ -130,7 +131,7 @@ export default function RegisterScreen() {
           value={formData.confirmPassword}
           onChangeText={(value) => updateFormData('confirmPassword', value)}
           secureTextEntry
-          leading={props => <Icon name="lock-check" {...props} />}
+          left={<TextInput.Icon icon="lock-check" />}
           style={styles.input}
         />
 
@@ -140,28 +141,29 @@ export default function RegisterScreen() {
           onChangeText={(value) => updateFormData('address', value)}
           multiline
           numberOfLines={3}
-          leading={props => <Icon name="map-marker" {...props} />}
+          left={<TextInput.Icon icon="map-marker" />}
           style={[styles.input, styles.addressInput]}
         />
 
         <Button
-          title="Register"
-          variant="contained"
-          color="#4CAF50"
-          tintColor="#fff"
+          mode="contained"
+          buttonColor="#4CAF50"
           onPress={handleRegister}
           style={styles.registerButton}
           uppercase={false}
-        />
+        >
+          Register
+        </Button>
 
         <Button
-          title="Change Role"
-          variant="outlined"
-          color="#666"
+          mode="outlined"
+          textColor="#666"
           onPress={() => setSelectedRole(null)}
           style={styles.backButton}
           uppercase={false}
-        />
+        >
+          Change Role
+        </Button>
       </Surface>
     </ScrollView>
   );
@@ -182,19 +184,19 @@ const styles = StyleSheet.create({
   roleContainer: {
     padding: 20,
     borderRadius: 12,
-    gap: 20,
   },
   roleButton: {
+    marginBottom: 20,
     height: 50,
   },
   form: {
     padding: 20,
     borderRadius: 12,
-    gap: 20,
     marginBottom: 40,
   },
   input: {
     backgroundColor: 'transparent',
+    marginBottom: 20,
   },
   addressInput: {
     height: 100,
@@ -202,8 +204,9 @@ const styles = StyleSheet.create({
   registerButton: {
     height: 45,
     marginTop: 10,
+    marginBottom: 10,
   },
   backButton: {
     height: 45,
   },
-}); 
+});
