@@ -2,29 +2,29 @@ package com.milkman.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.util.UUID;
 
 @Entity
 @Data
-public class Milkman {
+public class Customer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String name;
-    private String email;
-    private String phoneNumber;
-    private String address;
 
-    public Milkman() {
+    private String name;
+    private String phoneNumber;
+    private  String email;
+    private String address;
+    private int familySize;
+    private double defaultMilkQty;
+
+    public String getEmail() {
+        return email;
     }
 
-    public Milkman(UUID id, String name, String email, String phoneNumber, String address) {
-        this.id = id;
-        this.name = name;
+    public void setEmail(String email) {
         this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
     }
 
     public UUID getId() {
@@ -43,14 +43,6 @@ public class Milkman {
         this.name = name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -65,5 +57,21 @@ public class Milkman {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public int getFamilySize() {
+        return familySize;
+    }
+
+    public void setFamilySize(int familySize) {
+        this.familySize = familySize;
+    }
+
+    public double getDefaultMilkQty() {
+        return defaultMilkQty;
+    }
+
+    public void setDefaultMilkQty(double defaultMilkQty) {
+        this.defaultMilkQty = defaultMilkQty;
     }
 }

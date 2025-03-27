@@ -1,9 +1,10 @@
 package com.milkman.repository;
 
-import com.milkman.model.Milkman;
+import com.milkman.model.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface MilkmanRepository extends JpaRepository<Milkman, UUID> {
+public interface CustomerRepository extends JpaRepository<Customer, UUID> {
+
 }

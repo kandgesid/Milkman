@@ -1,31 +1,16 @@
-package com.milkman.model;
-
-import jakarta.persistence.*;
-import lombok.Data;
+package com.milkman.DTO;
 
 import java.util.UUID;
 
-@Entity
-@Data
-public class Milkman {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+public class CustomerDTO {
     private UUID id;
+
     private String name;
-    private String email;
     private String phoneNumber;
+    private  String email;
     private String address;
-
-    public Milkman() {
-    }
-
-    public Milkman(UUID id, String name, String email, String phoneNumber, String address) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-    }
+    private int familySize;
+    private double defaultMilkQty;
 
     public UUID getId() {
         return id;
@@ -43,14 +28,6 @@ public class Milkman {
         this.name = name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -59,11 +36,35 @@ public class Milkman {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getAddress() {
         return address;
     }
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public int getFamilySize() {
+        return familySize;
+    }
+
+    public void setFamilySize(int familySize) {
+        this.familySize = familySize;
+    }
+
+    public double getDefaultMilkQty() {
+        return defaultMilkQty;
+    }
+
+    public void setDefaultMilkQty(double defaultMilkQty) {
+        this.defaultMilkQty = defaultMilkQty;
     }
 }

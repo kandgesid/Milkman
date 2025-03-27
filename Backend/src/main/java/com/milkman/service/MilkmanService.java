@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class MilkmanService {
@@ -18,7 +19,7 @@ public class MilkmanService {
         return milkmanRepository.findAll();
     }
     
-    public Optional<Milkman> getMilkmanById(Long id) {
+    public Optional<Milkman> getMilkmanById(UUID id) {
         return milkmanRepository.findById(id);
     }
     
@@ -26,7 +27,7 @@ public class MilkmanService {
         return milkmanRepository.save(milkman);
     }
     
-    public Milkman updateMilkman(Long id, Milkman userDetails) {
+    public Milkman updateMilkman(UUID id, Milkman userDetails) {
         Milkman user = milkmanRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Milkman not found"));
         
@@ -38,7 +39,7 @@ public class MilkmanService {
         return milkmanRepository.save(user);
     }
     
-    public void deleteMilkman(Long id) {
+    public void deleteMilkman(UUID id) {
         milkmanRepository.deleteById(id);
     }
 } 

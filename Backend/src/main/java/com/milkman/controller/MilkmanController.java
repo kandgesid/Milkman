@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/milkman")
@@ -22,7 +23,7 @@ public class MilkmanController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Milkman> getMilkmanById(@PathVariable Long id) {
+    public ResponseEntity<Milkman> getMilkmanById(@PathVariable UUID id) {
         return milkmanService.getMilkmanById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -34,7 +35,7 @@ public class MilkmanController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Milkman> updateMilkman(@PathVariable Long id, @RequestBody Milkman userDetails) {
+    public ResponseEntity<Milkman> updateMilkman(@PathVariable UUID id, @RequestBody Milkman userDetails) {
         try {
             Milkman updatedMilkman = milkmanService.updateMilkman(id, userDetails);
             return ResponseEntity.ok(updatedMilkman);
@@ -44,7 +45,7 @@ public class MilkmanController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMilkman(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMilkman(@PathVariable UUID id) {
         milkmanService.deleteMilkman(id);
         return ResponseEntity.ok().build();
     }
