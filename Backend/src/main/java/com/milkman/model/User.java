@@ -3,16 +3,20 @@ package com.milkman.model;
 import com.milkman.types.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Data
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(updatable = false, nullable = false)
+    private UUID id;
 
     @Column(unique = true)
     private String username;
@@ -25,15 +29,15 @@ public class User {
     @Column(name = "role")
     private Set<Role> roles = new HashSet<>();
 
-    public User() {
-
+    public void addRole(Role role) {
+        this.roles.add(role);
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -60,8 +64,7 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
-    public void addRole(Role role) {
-        this.roles.add(role);
-    }
 
+    public User() {
+    }
 }

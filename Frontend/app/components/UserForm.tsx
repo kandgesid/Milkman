@@ -4,22 +4,18 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'reac
 interface UserFormProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (userData: { name: string; phone: string; address: string; email:string}) => void;
+  onSubmit: (userData: { phone: string; rate: string}) => void;
 }
 
 export default function UserForm({ visible, onClose, onSubmit }: UserFormProps) {
-  const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [email, setEmail] = useState('');
+  const [rate, setRate] = useState('');
 
   const handleSubmit = () => {
-    if (name && phone && address && email) {
-      onSubmit({ name, phone, address, email});
-      setName('');
+    if (phone && rate) {
+      onSubmit({phone, rate});
       setPhone('');
-      setAddress('');
-      setEmail('');
+      setRate('');
       onClose();
     }
   };
@@ -35,15 +31,7 @@ export default function UserForm({ visible, onClose, onSubmit }: UserFormProps) 
         <View style={styles.formContainer}>
           <Text style={styles.title}>Add New User</Text>
           
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Name</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter name"
-            />
-          </View>
+          
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Phone Number</Text>
@@ -57,25 +45,18 @@ export default function UserForm({ visible, onClose, onSubmit }: UserFormProps) 
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>Milk Rate</Text>
             <TextInput
               style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter email"
+              value={rate}
+              onChangeText={setRate}
+              placeholder="Enter milk rate for customer"
+              keyboardType="phone-pad"
             />
           </View>
+          
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Address</Text>
-            <TextInput
-              style={styles.input}
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Enter address"
-              multiline
-            />
-          </View>
+          
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>

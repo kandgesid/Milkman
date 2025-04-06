@@ -24,9 +24,12 @@ public class CustomerService {
     }
 
     public Customer getCustomerById(final UUID customerId){
-
         return customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
+    }
+
+    public List<Customer> getCustomerByPhoneNumber(final String phone){
+        return customerRepository.findByPhoneNumber(phone);
     }
 
     public List<Customer> getAllCustomersForMilkman(UUID milkmanId){

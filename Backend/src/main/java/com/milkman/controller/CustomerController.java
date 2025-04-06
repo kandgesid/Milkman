@@ -31,7 +31,6 @@ public class CustomerController {
     ResponseEntity<Customer> getCustomerById(@PathVariable UUID id){
         Customer customer = customerService.getCustomerById(id);
         return ResponseEntity.ok(customer);
-
     }
 //    @GetMapping("/{id}")
 //    ResponseEntity<?> getAllCustomersForMilkman(@PathVariable UUID id){

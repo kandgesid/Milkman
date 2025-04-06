@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Button, Card, TextInput, Surface } from 'react-native-paper';
 import { router } from 'expo-router';
 import useUserManagement from '../hooks/useUserManagement';
-import { User } from '../types';
+import { User, UserLogin} from '../types';
 
 export default function LandingPage() {
   const [phone, setPhone] = useState('');
@@ -22,13 +22,9 @@ export default function LandingPage() {
   }, [fadeAnim]);
 
   const handleSubmit = () => {
-    const newUser: User = {
-      name: '',
+    const newUser: UserLogin = {
       phoneNumber: phone,
-      address: '',
-      email: '',
       password: password,
-      confirmPassword: '',
       role: '',
     };
     handleLogin(newUser);

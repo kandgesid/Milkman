@@ -9,23 +9,19 @@ import java.util.UUID;
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "id") // This column is both PK and FK to User
+    private User user;
 
     private String name;
     private String phoneNumber;
-    private  String email;
+    private String email;
     private String address;
     private int familySize;
     private double defaultMilkQty;
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public UUID getId() {
         return id;
@@ -33,6 +29,14 @@ public class Customer {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getName() {
@@ -49,6 +53,14 @@ public class Customer {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getAddress() {

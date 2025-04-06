@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import axios from 'axios';
-import { User } from '../types';
+import { UserLogin, User } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'http://10.0.0.158:8080';
+
 
 const useUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,6 +18,8 @@ const useUserManagement = () => {
     password: '',
     confirmPassword: '',
     role: '',
+    noOfFamilyMembers: '',
+    dailyMilkRequired: '',
   });
 
   const resetForm = useCallback(() => {
@@ -27,6 +30,23 @@ const useUserManagement = () => {
       address: '',
       password: '',
       confirmPassword: '',
+      role: '',
+      noOfFamilyMembers: '',
+      dailyMilkRequired: '',
+    });
+  }, []);
+
+  const [loginUsers, setLoginUsers] = useState<UserLogin[]>([]);
+  const [loginFormData, setLoginFormData] = useState<UserLogin>({
+    phoneNumber: '',
+    password: '',
+    role: ''
+  });
+
+  const resetLoginForm = useCallback(() => {
+    setLoginFormData({
+      phoneNumber: '',
+      password: '',
       role: ''
     });
   }, []);
@@ -35,47 +55,53 @@ const useUserManagement = () => {
     try {
       // Get the token from AsyncStorage
       await AsyncStorage.removeItem('jwtToken');
-    // Optionally clear other user state or cached data here
-    Alert.alert('Success', 'Logged out successfully');
+      // Optionally clear other user state or cached data here
+      Alert.alert('Success', 'Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
       Alert.alert('Error', 'Failed to log out. Please try again.');
     }
   };
 
-  const handleLogin = useCallback(async (data?: User) => {
+  const handleLogin = useCallback(async (data?: UserLogin) => {
     try {
-      const submitData = data || formData;
-      
-      if (!submitData.phoneNumber || ! submitData.password) {
+      const submitData = data || loginFormData;
+
+      if (!submitData.phoneNumber || !submitData.password) {
         Alert.alert('Validation Error', 'Please enter both phone and password');
         return;
       }
       // console.log(submitData);
       const response = await axios.post(`${API_URL}/api/auth/login`, {
         username: submitData.phoneNumber, // assuming phone acts as the username, or adjust accordingly
-        password :submitData.password,
+        password: submitData.password,
       });
       const token = response.data.token;
-      // console.log(response.data.authorities[0].authority);
-      
+      console.log(response.data);
+
       if (token) {
         // Store the token for later API calls.
         await AsyncStorage.setItem('jwtToken', token);
-        // Optionally, you can also store other user details if provided.
         Alert.alert('Success', 'Login successful');
-        router.replace(`/home?role=${response.data.authorities[0].authority}`);
+        const role = response.data.authorities[0].authority;
+        if(role === "MILKMAN"){
+          router.replace(`/milkmanHome?id=${response.data.id}`);
+        }else{
+          //TODO: Change home URL to customerHome after creating page
+          router.replace(`/`);
+        }
+        
       } else {
         Alert.alert('Login Failed', 'No token received');
       }
-      resetForm();
+      resetLoginForm();
     } catch (error) {
       console.error('Login error:', error);
       Alert.alert(
         'Error', 'Failed to login user. Please try again.'
       );
     }
-  }, [formData, resetForm]);
+  }, [loginFormData, resetLoginForm]);
 
   const handleSubmit = useCallback(async (data?: User) => {
     try {
@@ -90,21 +116,36 @@ const useUserManagement = () => {
         Alert.alert('Validation Error', 'Please confirm your password !!');
         return;
       }
-      
-      const payload = {
-        email: submitData.email,  
-        password: submitData.password,
-        role: submitData.role,
-        name: submitData.name,
-        phoneNumber: submitData.phoneNumber,
-        address: submitData.address,
-      };
 
+      const payload = {} as any;
+      payload.email = submitData.email;
+      payload.password = submitData.password;
+      payload.role = submitData.role;
+      payload.name = submitData.name;
+      payload.phoneNumber = submitData.phoneNumber;
+      payload.address = submitData.address;
+      if (submitData.role === "CUSTOMER") {
+        const noOfFamilyMembers = parseInt(submitData.noOfFamilyMembers);
+        const dailyMilkRequired = parseInt(submitData.dailyMilkRequired);
+
+        if (isNaN(noOfFamilyMembers) || isNaN(dailyMilkRequired)) {
+          Alert.alert('Validation Error', 'Number of family members and daily milk required must be integers');
+          return;
+        }
+
+        if (noOfFamilyMembers <= 0 || dailyMilkRequired <= 0) {
+          Alert.alert('Validation Error', 'Number of family members and daily milk required must be positive integers');
+          return;
+        }
+
+        payload.noOfFamilyMembers = noOfFamilyMembers;
+        payload.dailyMilkRequired = dailyMilkRequired;
+      }
       await axios.post(`${API_URL}/api/auth/register`, payload);
       Alert.alert('Success', 'User registered successfully');
-      
+
       resetForm();
-      router.replace(`/auth/login?role=${submitData.role}`);
+      router.replace(`../components/landingPage/`);
     } catch (error) {
       Alert.alert(
         'Error', 'Failed to register user. Please try again.'
@@ -116,8 +157,11 @@ const useUserManagement = () => {
 
   return {
     users,
+    loginUsers,
+    loginFormData,
     formData,
     setFormData,
+    setLoginFormData,
     handleSubmit,
     handleLogin,
     handleLogout,

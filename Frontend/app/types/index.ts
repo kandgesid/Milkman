@@ -7,6 +7,24 @@ export interface User {
   password: string;
   confirmPassword: string
   role: string;
+  noOfFamilyMembers: string;
+  dailyMilkRequired: string;
+}
+
+export interface UserLogin {
+  phoneNumber: string;
+  password: string;
+  role: string;
+}
+
+export interface Customer {
+  id?: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  noOfFamilyMembers: number;
+  dailyMilkRequired: number;
 }
 
 export interface Milkman {
@@ -15,6 +33,12 @@ export interface Milkman {
   email: string;
   phoneNumber: string;
   address: string;
+}
+
+export interface newCustomer {
+  phoneNumber: string;
+  rate: string;
+  milkManId: string;
 }
 
 export interface UserFormProps {

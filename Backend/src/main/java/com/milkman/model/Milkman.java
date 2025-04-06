@@ -8,24 +8,19 @@ import java.util.UUID;
 @Entity
 @Data
 public class Milkman {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "id") // This column is both PK and FK to User
+    private User user;
+
     private String name;
     private String email;
     private String phoneNumber;
     private String address;
-
-    public Milkman() {
-    }
-
-    public Milkman(UUID id, String name, String email, String phoneNumber, String address) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-    }
 
     public UUID getId() {
         return id;
@@ -33,6 +28,14 @@ public class Milkman {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getName() {

@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Text, TextInput, Button, Surface } from 'react-native-paper';
 import useUserManagement from '../hooks/useUserManagement';
-import { User } from '../types';
+import { UserLogin } from '../types';
 
 export default function LoginScreen() {
   const { role } = useLocalSearchParams();
@@ -13,13 +13,10 @@ export default function LoginScreen() {
 
   const handleSubmit = () => {
     // TODO: Implement actual login logic with API
-    const newUser: User = {
-      name: '',
+    const newUser: UserLogin = {
+      
       phoneNumber: phone,
-      address: '',
-      email: '',
       password: password,
-      confirmPassword: '',
       role: typeof role === 'string' ? role : role[0],
     };
     handleLogin(newUser);

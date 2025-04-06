@@ -19,8 +19,9 @@ public class MilkmanService {
         return milkmanRepository.findAll();
     }
     
-    public Optional<Milkman> getMilkmanById(UUID id) {
-        return milkmanRepository.findById(id);
+    public Milkman getMilkmanById(UUID id) {
+        return milkmanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Milkman not found"));
     }
     
     public Milkman createMilkman(Milkman milkman) {

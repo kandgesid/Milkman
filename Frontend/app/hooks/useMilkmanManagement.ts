@@ -1,24 +1,36 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import axios from 'axios';
-import { Milkman, User } from '../types';
+// import axios from 'axios';
+import instacnce from '../auth/axiosConfig';
+import { Milkman, newCustomer, User } from '../types';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'http://10.0.0.158:8080';
 
-const useUserManagement = () => {
+const useMilkManagement = () => {
   const [milkmans, setUsers] = useState<Milkman[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null); // if you need role as well
   const [formData, setFormData] = useState<Milkman>({
     name: '',
     email: '',
     phoneNumber: '',
     address: '',
   });
+
+  const [newCustomerFormData, setNewCustomerFormData] = useState<newCustomer>({
+    phoneNumber: '',
+    rate: '',
+    milkManId: '',
+  });
   
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchUsers = useCallback(async () => {
+    console.log("useMilkManagement : " + userId);
+    if (!userId) return;
     try {
-      const response = await axios.get(`${API_URL}/api/milkman`);
+      console.log("fetchUser : " + userId);
+      const response = await instacnce.get(`${API_URL}/api/milkman/myCustomers/${userId}`);
       setUsers(response.data);
     } catch (error) {
       Alert.alert(
@@ -26,11 +38,13 @@ const useUserManagement = () => {
         'Failed to fetch users. Please check your connection and try again.'
       );
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (userId) {
+      fetchUsers();
+    }
+  }, [userId, fetchUsers]);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -42,6 +56,36 @@ const useUserManagement = () => {
     setEditingId(null);
   }, []);
 
+  const resetNewCustomerForm = useCallback(() => {
+    setNewCustomerFormData({
+      phoneNumber: '',
+      rate: '',
+      milkManId: '',
+    });
+    setEditingId(null);
+  }, []);
+
+  const handleAddCustomer = useCallback(async (data?: newCustomer) => {
+    try {
+      console.log(data)
+      const submitData = data || newCustomerFormData;
+      
+      if (!submitData.phoneNumber || !submitData.rate || !submitData.milkManId) {
+        Alert.alert('Validation Error', 'Please fill in all required fields');
+        return;
+      }
+      const response = await instacnce.post(`${API_URL}/api/milkman/addNewCustomer`, submitData);
+      console.log(response);
+      Alert.alert('Success', 'User added successfully');
+      resetNewCustomerForm();
+      fetchUsers();
+    } catch (error) {
+      Alert.alert(
+        'Error', 'Failed to add user. Please try again.'
+      );
+    }
+  }, [newCustomerFormData, resetNewCustomerForm, fetchUsers]);
+
   const handleSubmit = useCallback(async (data?: Milkman) => {
     try {
       const submitData = data || formData;
@@ -52,10 +96,10 @@ const useUserManagement = () => {
       }
 
       if (editingId) {
-        await axios.put(`${API_URL}/api/milkman/${editingId}`, submitData);
+        await instacnce.put(`${API_URL}/api/milkman/${editingId}`, submitData);
         Alert.alert('Success', 'User updated successfully');
       } else {
-        await axios.post(`${API_URL}/api/milkman`, submitData);
+        await instacnce.post(`${API_URL}/api/milkman`, submitData);
         Alert.alert('Success', 'User added successfully');
       }
       
@@ -78,7 +122,7 @@ const useUserManagement = () => {
 
   const handleDelete = useCallback(async (id: number) => {
     try {
-      await axios.delete(`${API_URL}/api/milkman/${id}`);
+      await instacnce.delete(`${API_URL}/api/milkman/${id}`);
       Alert.alert('Success', 'User deleted successfully');
       fetchUsers();
     } catch (error) {
@@ -90,11 +134,15 @@ const useUserManagement = () => {
     milkmans,
     formData,
     editingId,
+    userId,
     setFormData,
     handleSubmit,
     handleEdit,
     handleDelete,
+    setUserId,
+    setUserRole,
+    handleAddCustomer
   };
 };
 
-export default useUserManagement; 
+export default useMilkManagement; 

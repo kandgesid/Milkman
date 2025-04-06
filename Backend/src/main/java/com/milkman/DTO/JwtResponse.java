@@ -3,15 +3,16 @@ package com.milkman.DTO;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class JwtResponse {
     private String token;
     private String type = "Bearer";
-    private Long id;
+    private UUID id;
     private String username;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public JwtResponse(String token, Long id, String username, Collection<? extends GrantedAuthority> authorities) {
+    public JwtResponse(String token, UUID id, String username, Collection<? extends GrantedAuthority> authorities) {
         this.token = token;
         this.id = id;
         this.username = username;
@@ -25,8 +26,8 @@ public class JwtResponse {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

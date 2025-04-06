@@ -3,8 +3,10 @@ package com.milkman.controller;
 import com.milkman.DTO.JwtResponse;
 import com.milkman.DTO.LoginRequest;
 import com.milkman.DTO.SignUpRequest;
+import com.milkman.model.Customer;
 import com.milkman.model.Milkman;
 import com.milkman.model.User;
+import com.milkman.repository.CustomerRepository;
 import com.milkman.repository.MilkmanRepository;
 import com.milkman.repository.UserRepository;
 import com.milkman.security.JwtProvider;
@@ -36,6 +38,9 @@ public class AuthController {
     private MilkmanRepository milkmanRepository;
 
     @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -53,11 +58,13 @@ public class AuthController {
         user.setUsername(signUpRequest.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-        String role = "N/A";
         if (Role.MILKMAN.toString().equalsIgnoreCase(signUpRequest.getRole())) {
             user.addRole(Role.MILKMAN);
+            // Save user first to generate its UUID
+            userRepository.save(user);
+
             Milkman milkman = new Milkman();
-            //TODO: Create milkman model and save milkman object
+            milkman.setUser(user);  // Establish the shared primary key association.
             milkman.setName(signUpRequest.getName());
             milkman.setEmail(signUpRequest.getEmail());
             milkman.setAddress(signUpRequest.getAddress());
@@ -65,9 +72,19 @@ public class AuthController {
             milkmanRepository.save(milkman);
         } else {
             user.addRole(Role.CUSTOMER);
-            //TODO: Create customer model and save cutomer object
+            // Save user first to generate its UUID
+            userRepository.save(user);
+
+            Customer customer = new Customer();
+            customer.setUser(user);  // Establish the shared primary key association.
+            customer.setName(signUpRequest.getName());
+            customer.setEmail(signUpRequest.getEmail());
+            customer.setAddress(signUpRequest.getAddress());
+            customer.setPhoneNumber(signUpRequest.getPhoneNumber());
+            customer.setFamilySize(signUpRequest.getNoOfFamilyMembers());
+            customer.setDefaultMilkQty(signUpRequest.getDailyMilkRequired());
+            customerRepository.save(customer);
         }
-        userRepository.save(user);
         return ResponseEntity.ok("User registered successfully");
     }
 

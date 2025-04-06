@@ -7,14 +7,34 @@ public class SignUpRequest {
     private String address;
     private String password;
     private String role;
+    private int noOfFamilyMembers;
+    private double dailyMilkRequired;
 
-    public SignUpRequest(String name, String email, String phoneNumber, String address, String password, String role) {
+    public int getNoOfFamilyMembers() {
+        return noOfFamilyMembers;
+    }
+
+    public void setNoOfFamilyMembers(int noOfFamilyMembers) {
+        this.noOfFamilyMembers = noOfFamilyMembers;
+    }
+
+    public double getDailyMilkRequired() {
+        return dailyMilkRequired;
+    }
+
+    public void setDailyMilkRequired(double dailyMilkRequired) {
+        this.dailyMilkRequired = dailyMilkRequired;
+    }
+
+    public SignUpRequest(String name, String email, String phoneNumber, String address, String password, String role, int noOfFamilyMembers, double dailyMilkRequired) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.password = password;
         this.role = role;
+        this.noOfFamilyMembers = noOfFamilyMembers;
+        this.dailyMilkRequired = dailyMilkRequired;
     }
 
     public String getRole() {
