@@ -22,7 +22,16 @@ public class MilkmanCustomer {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @Column(name = "created_at")
+    @Column(nullable = false)
+    private double milkRate;
+
+    @Column(nullable = false)
+    private double dueAmount;
+
+    private String paymentStatus;
+
+    private LocalDateTime lastUpdated;
+
     private LocalDateTime createdAt;
 
     public UUID getId() {
@@ -55,5 +64,37 @@ public class MilkmanCustomer {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public double getMilkRate() {
+        return milkRate;
+    }
+
+    public void setMilkRate(double milkRate) {
+        this.milkRate = milkRate;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public double getDueAmount() {
+        return dueAmount;
+    }
+
+    public void setDueAmount(double dueAmount) {
+        this.dueAmount = dueAmount;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }

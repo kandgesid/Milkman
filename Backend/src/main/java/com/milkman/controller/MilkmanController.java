@@ -1,21 +1,19 @@
 package com.milkman.controller;
 
 import com.milkman.DTO.AddNewCustomerDTO;
+import com.milkman.DTO.MilkOrderResponseDTO;
 import com.milkman.model.Customer;
 import com.milkman.model.Milkman;
 import com.milkman.model.MilkmanCustomer;
-import com.milkman.repository.MilkmanCustomerRepository;
-import com.milkman.repository.MilkmanRepository;
 import com.milkman.service.CustomerService;
 import com.milkman.service.MilkmanService;
+import com.milkman.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -30,7 +28,7 @@ public class MilkmanController {
     private CustomerService customerService;
 
     @Autowired
-    private MilkmanCustomerRepository milkmanCustomerRepository;
+    private OrderService orderService;
     
     @GetMapping
     public List<Milkman> getAllMilkman() {
@@ -57,6 +55,16 @@ public class MilkmanController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);
         }
     }
+
+    @GetMapping("/{milkmanId}/orders/today")
+    ResponseEntity<?> getTodaysOrdersForMilkman(@PathVariable("milkmanId") UUID id){
+       try{
+           List<MilkOrderResponseDTO> orders = orderService.getTodaysOrdersForMilkman(id);
+           return ResponseEntity.status(HttpStatus.OK).body(orders);
+       }catch (Exception ex){
+           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);
+       }
+    }
     
     @PostMapping
     public Milkman createMilkman(@RequestBody Milkman user) {
@@ -72,12 +80,7 @@ public class MilkmanController {
                 return ResponseEntity.notFound().build();
             }
             Customer customer = customerList.get(0);
-            MilkmanCustomer milkmanCustomer = new MilkmanCustomer();
-            Milkman milkman =  milkmanService.getMilkmanById(userDetails.getMilkManId());
-            milkmanCustomer.setMilkman(milkman);
-            milkmanCustomer.setCustomer(customer);
-            milkmanCustomer.setCreatedAt(LocalDateTime.now());
-            milkmanCustomerRepository.save(milkmanCustomer);
+            MilkmanCustomer milkmanCustomer = milkmanService.addCustomerForMilkman(customer, userDetails);
             return ResponseEntity.ok(milkmanCustomer);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);

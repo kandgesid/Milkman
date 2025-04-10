@@ -15,16 +15,16 @@ public class MilkOrder {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    @JoinColumn(name = "milkman_customer_id", nullable = false)
+    private MilkmanCustomer milkmanCustomer;
 
-    @ManyToOne
-    @JoinColumn(name = "milkman_id", nullable = false)
-    private Milkman milkman;
-
-    private LocalDateTime orderDate;
+    private LocalDate orderDate;
 
     private double quantity;
+
+    private double rate;
+
+    private double amount;
 
     private String note;
 
@@ -40,19 +40,19 @@ public class MilkOrder {
         this.id = id;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public MilkmanCustomer getMilkmanCustomer() {
+        return milkmanCustomer;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setMilkmanCustomer(MilkmanCustomer milkmanCustomer) {
+        this.milkmanCustomer = milkmanCustomer;
     }
 
-    public LocalDateTime getOrderDate() {
+    public LocalDate getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(LocalDateTime orderDate) {
+    public void setOrderDate(LocalDate orderDate) {
         this.orderDate = orderDate;
     }
 
@@ -62,6 +62,22 @@ public class MilkOrder {
 
     public void setQuantity(double quantity) {
         this.quantity = quantity;
+    }
+
+    public double getRate() {
+        return rate;
+    }
+
+    public void setRate(double rate) {
+        this.rate = rate;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public String getNote() {
@@ -86,13 +102,5 @@ public class MilkOrder {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public Milkman getMilkman() {
-        return milkman;
-    }
-
-    public void setMilkman(Milkman milkman) {
-        this.milkman = milkman;
     }
 }
