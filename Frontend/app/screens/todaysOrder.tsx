@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, Text } from 'react-native';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
 import { Appbar, Drawer, DataTable, Portal, Modal, Button } from 'react-native-paper';
 import { useLocalSearchParams, router } from 'expo-router';
-import useMilkManagement from '../hooks/useMilkmanManagement';
+import useOrderManagement from '../hooks/useOrderManagement';
 import useUserManagement from '../hooks/useUserManagement';
 
 interface DrawerLayoutRef {
@@ -13,11 +13,11 @@ interface DrawerLayoutRef {
 
 export default function TodaysOrderScreen() {
   const { id } = useLocalSearchParams();
-  const { userId, setUserId, milkmans } = useMilkManagement();
+  const { userId, setUserId, orders } = useOrderManagement();
   const { handleLogout } = useUserManagement();
 
   // Sorting state: only for 'name' and 'address'
-  const [sortColumn, setSortColumn] = useState<'name' | 'address'>('name');
+  const [sortColumn, setSortColumn] = useState<'customerName' | 'customerAddress'>('customerName');
   const [sortDirection, setSortDirection] = useState<'ascending' | 'descending'>('ascending');
 
   // Animation value for the table container
@@ -42,7 +42,7 @@ export default function TodaysOrderScreen() {
     router.push('/screens/landingPage');
   };
 
-  const handleSort = (column: 'name' | 'address') => {
+  const handleSort = (column: 'customerName' | 'customerAddress') => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'ascending' ? 'descending' : 'ascending');
     } else {
@@ -52,7 +52,7 @@ export default function TodaysOrderScreen() {
   };
 
   // Sort the milkmans data based on the selected column and direction.
-  const sortedMilkmans = [...milkmans].sort((a, b) => {
+  const sortedOrders = [...orders].sort((a, b) => {
     const aValue = (a[sortColumn] || '').toString();
     const bValue = (b[sortColumn] || '').toString();
     return sortDirection === 'ascending'
@@ -64,7 +64,7 @@ export default function TodaysOrderScreen() {
   const [page, setPage] = useState(0);
   const rowsPerPage = 5;
   const from = page * rowsPerPage;
-  const to = Math.min((page + 1) * rowsPerPage, sortedMilkmans.length);
+  const to = Math.min((page + 1) * rowsPerPage, sortedOrders.length);
 
   // State for selected row (order) modal
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -151,42 +151,74 @@ export default function TodaysOrderScreen() {
             },
           ]}
         >
+          <View style={styles.tableHeaderContainer}>
+            <Text style={styles.tableTitle}>Today's Orders</Text>
+            <Text style={styles.tableSubtitle}>{sortedOrders.length} orders to process</Text>
+          </View>
+          
           <DataTable>
-            <DataTable.Header>
+            <DataTable.Header style={styles.tableHeader}>
               <DataTable.Title
-                sortDirection={sortColumn === 'name' ? sortDirection : undefined}
-                onPress={() => handleSort('name')}
+                sortDirection={sortColumn === 'customerName' ? sortDirection : undefined}
+                onPress={() => handleSort('customerName')}
+                style={styles.headerCell}
+                textStyle={styles.headerText}
               >
-                Name
+                Customer
               </DataTable.Title>
-              <DataTable.Title>
-                Phone
-              </DataTable.Title>
-              <DataTable.Title>
+              <DataTable.Title
+                style={styles.headerCell}
+                textStyle={styles.headerText}
+              >
                 Quantity
               </DataTable.Title>
               <DataTable.Title
-                sortDirection={sortColumn === 'address' ? sortDirection : undefined}
-                onPress={() => handleSort('address')}
+                sortDirection={sortColumn === 'customerAddress' ? sortDirection : undefined}
+                onPress={() => handleSort('customerAddress')}
+                style={styles.headerCell}
+                textStyle={styles.headerText}
               >
                 Address
               </DataTable.Title>
             </DataTable.Header>
 
-            {sortedMilkmans.slice(from, to).map((item) => (
-              <DataTable.Row key={item.id?.toString()} onPress={() => onRowPress(item)}>
-                <DataTable.Cell>{item.name}</DataTable.Cell>
-                <DataTable.Cell>{item.phoneNumber}</DataTable.Cell>
-                <DataTable.Cell>{0}</DataTable.Cell>
-                <DataTable.Cell>{item.address}</DataTable.Cell>
+            {sortedOrders.slice(from, to).map((item, index) => (
+              <DataTable.Row 
+                key={item.milkmanCustomerId?.toString()} 
+                onPress={() => onRowPress(item)}
+                style={[
+                  styles.tableRow,
+                  index % 2 === 0 ? styles.evenRow : styles.oddRow
+                ]}
+              >
+                <DataTable.Cell style={styles.cell}>
+                  <View style={styles.customerCell}>
+                    <Text style={styles.customerName}>{item.customerName}</Text>
+                    <Text style={styles.orderDate}>
+                      {item.orderDate ? new Date(item.orderDate).toLocaleDateString() : 'N/A'}
+                    </Text>
+                  </View>
+                </DataTable.Cell>
+                <DataTable.Cell style={styles.cell}>
+                  <View style={styles.quantityCell}>
+                    <Text style={styles.quantityText}>{item.milkQuantity}</Text>
+                    <Text style={styles.quantityUnit}>liters</Text>
+                  </View>
+                </DataTable.Cell>
+                <DataTable.Cell style={styles.cell}>
+                  <Text style={styles.addressText} numberOfLines={2}>
+                    {item.customerAddress}
+                  </Text>
+                </DataTable.Cell>
               </DataTable.Row>
             ))}
 
             <DataTable.Pagination
               page={page}
-              numberOfPages={Math.ceil(sortedMilkmans.length / rowsPerPage)}
+              numberOfPages={Math.ceil(sortedOrders.length / rowsPerPage)}
               onPageChange={(page) => setPage(page)}
-              label={`${from + 1}-${to} of ${sortedMilkmans.length}`}
+              label={`${from + 1}-${to} of ${sortedOrders.length}`}
+              style={styles.pagination}
             />
           </DataTable>
         </Animated.View>
@@ -198,21 +230,63 @@ export default function TodaysOrderScreen() {
             onDismiss={() => setModalVisible(false)}
             contentContainerStyle={styles.modalContainer}
           >
-            <View>
-              <DataTable>
-                <DataTable.Row>
-                  <DataTable.Cell>{selectedItem?.name}</DataTable.Cell>
-                  <DataTable.Cell>{selectedItem?.phoneNumber}</DataTable.Cell>
-                  <DataTable.Cell>{selectedItem?.quantity || 0}</DataTable.Cell>
-                  <DataTable.Cell>{selectedItem?.address}</DataTable.Cell>
-                </DataTable.Row>
-              </DataTable>
-              <Button mode="contained" onPress={confirmOrder} style={styles.button}>
-                Confirm Order
-              </Button>
-              <Button mode="outlined" onPress={cancelOrder} style={styles.button}>
-                Cancel Order
-              </Button>
+            <View style={styles.cardContainer}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>Order Details</Text>
+                <Text style={styles.orderStatus}>{selectedItem?.status}</Text>
+              </View>
+              <View style={styles.cardContent}>
+                <View style={styles.detailSection}>
+                  <Text style={styles.sectionTitle}>Customer Information</Text>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Name:</Text>
+                    <Text style={styles.detailValue}>{selectedItem?.customerName}</Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Address:</Text>
+                    <Text style={styles.detailValue}>{selectedItem?.customerAddress}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.detailSection}>
+                  <Text style={styles.sectionTitle}>Order Information</Text>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Order Date:</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedItem?.orderDate ? new Date(selectedItem.orderDate).toLocaleDateString() : 'N/A'}
+                    </Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Quantity:</Text>
+                    <Text style={styles.detailValue}>{selectedItem?.milkQuantity || 0} liters</Text>
+                  </View>
+                </View>
+
+                {selectedItem?.note && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.sectionTitle}>Additional Notes</Text>
+                    <View style={styles.noteContainer}>
+                      <Text style={styles.noteText}>{selectedItem.note}</Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+              <View style={styles.cardActions}>
+                <Button 
+                  mode="contained" 
+                  onPress={confirmOrder} 
+                  style={[styles.button, styles.confirmButton]}
+                >
+                  Confirm Order
+                </Button>
+                <Button 
+                  mode="outlined" 
+                  onPress={cancelOrder} 
+                  style={[styles.button, styles.cancelButton]}
+                >
+                  Cancel Order
+                </Button>
+              </View>
             </View>
           </Modal>
         </Portal>
@@ -232,14 +306,12 @@ const styles = StyleSheet.create({
   tableContainer: {
     margin: 16,
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 8,
-    // iOS shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    // Android elevation
     elevation: 3,
     overflow: 'hidden',
   },
@@ -249,12 +321,173 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     margin: 20,
     padding: 20,
+  },
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  cardHeader: {
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  orderStatus: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4CAF50',
+    textTransform: 'capitalize',
+  },
+  cardContent: {
+    padding: 16,
+  },
+  detailSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    flexWrap: 'wrap',
+  },
+  detailLabel: {
+    width: '30%',
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  detailValue: {
+    width: '70%',
+    fontSize: 14,
+    color: '#333',
+  },
+  noteContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  noteText: {
+    fontSize: 14,
+    color: '#495057',
+    lineHeight: 20,
+  },
+  cardActions: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   button: {
-    marginTop: 10,
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  confirmButton: {
+    backgroundColor: '#4CAF50',
+  },
+  cancelButton: {
+    borderColor: '#f44336',
+  },
+  tableHeaderContainer: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  tableTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  tableSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  tableHeader: {
+    backgroundColor: '#f8f9fa',
+    height: 50,
+  },
+  headerCell: {
+    justifyContent: 'center',
+  },
+  headerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#495057',
+  },
+  tableRow: {
+    height: 70,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  evenRow: {
+    backgroundColor: '#fff',
+  },
+  oddRow: {
+    backgroundColor: '#f8f9fa',
+  },
+  cell: {
+    justifyContent: 'center',
+  },
+  customerCell: {
+    flex: 1,
+  },
+  customerName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 4,
+  },
+  orderDate: {
+    fontSize: 12,
+    color: '#666',
+  },
+  quantityCell: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  quantityText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginRight: 4,
+  },
+  quantityUnit: {
+    fontSize: 12,
+    color: '#666',
+  },
+  addressText: {
+    fontSize: 13,
+    color: '#495057',
+    lineHeight: 18,
+  },
+  pagination: {
+    backgroundColor: '#f8f9fa',
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
   },
 });

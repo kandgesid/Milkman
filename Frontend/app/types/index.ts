@@ -25,6 +25,17 @@ export interface Customer {
   address: string;
   noOfFamilyMembers: number;
   dailyMilkRequired: number;
+  rate?: string;
+}
+
+export interface Order{
+    milkmanCustomerId: string;
+    customerName: string;
+    note: string;
+    orderDate: Date;
+    milkQuantity: number;
+    status: string;
+    customerAddress: string;
 }
 
 export interface Milkman {

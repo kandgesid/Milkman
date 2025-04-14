@@ -5,7 +5,7 @@ import { UserLogin, User } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'http://10.0.0.158:8080';
 
 
 const useUserManagement = () => {
@@ -144,7 +144,7 @@ const useUserManagement = () => {
       Alert.alert('Success', 'User registered successfully');
 
       resetForm();
-      router.replace(`../components/landingPage/`);
+      router.replace(`../screens/landingPage/`);
     } catch (error) {
       Alert.alert(
         'Error', 'Failed to register user. Please try again.'

@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 // import axios from 'axios';
 import instacnce from '../auth/axiosConfig';
-import { Milkman, newCustomer, User } from '../types';
+import { Milkman, newCustomer, User, Order, Customer } from '../types';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'http://10.0.0.158:8080';
 
 const useMilkManagement = () => {
-  const [milkmans, setUsers] = useState<Milkman[]>([]);
+  const [customers, setUsers] = useState<Customer[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null); // if you need role as well
   const [formData, setFormData] = useState<Milkman>({
@@ -131,7 +131,7 @@ const useMilkManagement = () => {
   }, [fetchUsers]);
 
   return {
-    milkmans,
+    customers,
     formData,
     editingId,
     userId,
