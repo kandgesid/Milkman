@@ -3,17 +3,17 @@ import { View, StyleSheet, Animated } from 'react-native';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
 import { Appbar, Text, Drawer, FAB, DataTable } from 'react-native-paper';
 import { useLocalSearchParams, router } from 'expo-router';
-import UserForm from './components/UserForm';
-import useMilkManagement from './hooks/useMilkmanManagement';
-import useUserManagement from './hooks/useUserManagement';
-import { Milkman, newCustomer } from './types';
+import UserForm from '../components/UserForm';
+import useMilkManagement from '../hooks/useMilkmanManagement';
+import useUserManagement from '../hooks/useUserManagement';
+import { Customer, newCustomer } from '../types';
 
 interface DrawerLayoutRef {
   openDrawer: () => void;
   closeDrawer: () => void;
 }
 
-export default function HomeScreen() {
+export default function CustomerHomeScreen() {
   const { id } = useLocalSearchParams();
   const [showAddUser, setShowAddUser] = useState(false);
   const { userId, setUserId, milkmans, handleAddCustomer } = useMilkManagement();
@@ -28,7 +28,6 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (id) {
-      console.log("home : " + id);
       setUserId(id as string);
     }
     // Animate the table container when component mounts
@@ -54,7 +53,7 @@ export default function HomeScreen() {
 
   const handleLogoutButton = () => {
     handleLogout();
-    router.push('/components/landingPage'); // Adjust the route as necessary
+    router.push('/screens/landingPage'); // Adjust the route as necessary
   };
 
   const handleSort = (column: 'name' | 'phoneNumber' | 'address') => {

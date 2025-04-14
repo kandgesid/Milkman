@@ -5,7 +5,7 @@ import { UserLogin, User } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
-const API_URL = 'http://10.0.0.158:8080';
+const API_URL = 'http://localhost:8080';
 
 
 const useUserManagement = () => {
@@ -85,10 +85,9 @@ const useUserManagement = () => {
         Alert.alert('Success', 'Login successful');
         const role = response.data.authorities[0].authority;
         if(role === "MILKMAN"){
-          router.replace(`/milkmanHome?id=${response.data.id}`);
+          router.replace(`/screens/milkmanHome?id=${response.data.id}`);
         }else{
-          //TODO: Change home URL to customerHome after creating page
-          router.replace(`/`);
+          router.replace(`/screens/customerHome?id=${response.data.id}`);
         }
         
       } else {
