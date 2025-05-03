@@ -3,14 +3,14 @@ package com.milkman.DTO;
 import java.time.LocalDate;
 
 public class ConfirmDeliveryRequestDTO {
-    private LocalDate orderDate;
+    private String orderDate;
     private String remark;
 
-    public LocalDate getOrderDate() {
+    public String getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(LocalDate orderDate) {
+    public void setOrderDate(String orderDate) {
         this.orderDate = orderDate;
     }
 

@@ -1,21 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Animated, ScrollView, Dimensions } from 'react-native';
+import { View, StyleSheet, Animated, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
 import { Appbar, Text, Drawer, FAB, Searchbar, Surface, useTheme, DataTable, Portal, Modal, Provider as PaperProvider } from 'react-native-paper';
 import { useLocalSearchParams, router } from 'expo-router';
 import UserForm from '../components/UserForm';
 import useMilkManagement from '../hooks/useMilkmanManagement';
 import useUserManagement from '../hooks/useUserManagement';
-import { Milkman, newCustomer } from '../types';
+import { Customer, Milkman, newCustomer } from '../types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import CustomPagination from '../components/CustomPagination';
 
 interface DrawerLayoutRef {
   openDrawer: () => void;
   closeDrawer: () => void;
 }
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 5;
 
 export default function MilkManHomeScreen() {
   const { id } = useLocalSearchParams();
@@ -25,6 +26,8 @@ export default function MilkManHomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const theme = useTheme();
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [showCustomerDetails, setShowCustomerDetails] = useState(false);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -74,6 +77,11 @@ export default function MilkManHomeScreen() {
 
   const from = page * ITEMS_PER_PAGE;
   const to = Math.min((page + 1) * ITEMS_PER_PAGE, filteredCustomers.length);
+
+  const handleCustomerPress = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setShowCustomerDetails(true);
+  };
 
   const navigationView = () => (
     <PaperProvider theme={{ colors: { text: '#000000', primary: '#000000', onSurface: '#000000' } }}>
@@ -225,62 +233,68 @@ export default function MilkManHomeScreen() {
                   }
                 }}
               >
-                <DataTable>
-                  <DataTable.Header style={styles.tableHeader}>
-                    <DataTable.Title
-                      style={styles.headerCell}
-                      textStyle={styles.headerText}
-                    >
-                      Name
-                    </DataTable.Title>
-                    <DataTable.Title
-                      style={styles.headerCell}
-                      textStyle={styles.headerText}
-                    >
-                      Phone
-                    </DataTable.Title>
-                    <DataTable.Title
-                      style={styles.headerCell}
-                      textStyle={styles.headerText}
-                    >
-                      Address
-                    </DataTable.Title>
-                  </DataTable.Header>
+                <View>
+                  <DataTable style={{ width: '100%' }}>
+                    <DataTable.Header style={styles.tableHeader}>
+                      <DataTable.Title
+                        style={[styles.headerCell, { flex: 2 }]}
+                        textStyle={[styles.headerText, { textAlign: 'center' }]}
+                      >
+                        Name
+                      </DataTable.Title>
+                      <DataTable.Title
+                        style={[styles.headerCell, { flex: 1.5 }]}
+                        textStyle={[styles.headerText, { textAlign: 'center' }]}
+                      >
+                        Phone
+                      </DataTable.Title>
+                      <DataTable.Title
+                        style={[styles.headerCell, { flex: 1 }]}
+                        textStyle={[styles.headerText, { textAlign: 'center' }]}
+                      >
+                        Due Amt
+                      </DataTable.Title>
+                    </DataTable.Header>
 
-                  {filteredCustomers.slice(from, to).map((customer, index) => (
-                    <DataTable.Row 
-                      key={customer.id?.toString()}
-                      style={[
-                        styles.tableRow,
-                        index % 2 === 0 ? styles.evenRow : styles.oddRow
-                      ]}
-                    >
-                      <DataTable.Cell style={styles.cell}>
-                        <Text style={styles.customerName}>{customer.name}</Text>
-                      </DataTable.Cell>
-                      <DataTable.Cell style={styles.cell}>
-                        <Text style={styles.phoneText}>{customer.phoneNumber}</Text>
-                      </DataTable.Cell>
-                      <DataTable.Cell style={styles.cell}>
-                        <Text style={styles.addressText} numberOfLines={2}>
-                          {customer.address}
-                        </Text>
-                      </DataTable.Cell>
-                    </DataTable.Row>
-                  ))}
-
-                  <DataTable.Pagination
+                    {filteredCustomers.length === 0 ? (
+                      <View style={styles.noDataContainer}>
+                        <MaterialCommunityIcons name="account-group-outline" size={48} color="#BBDEFB" />
+                        <Text style={styles.noDataText}>No customers found</Text>
+                        <Text style={styles.noDataSubtext}>Add your first customer using the + button</Text>
+                      </View>
+                    ) : (
+                      filteredCustomers.slice(from, to).map((customer, index) => (
+                        <TouchableOpacity
+                          key={customer.id?.toString()}
+                          onPress={() => handleCustomerPress(customer)}
+                          style={styles.rowTouchable}
+                        >
+                          <DataTable.Row 
+                            style={[
+                              styles.tableRow,
+                              index % 2 === 0 ? styles.evenRow : styles.oddRow
+                            ]}
+                          >
+                            <DataTable.Cell style={[styles.cell, { flex: 2 }]}>
+                              <Text style={[styles.customerName, { textAlign: 'center' }]} numberOfLines={1}>{customer.name}</Text>
+                            </DataTable.Cell>
+                            <DataTable.Cell style={[styles.cell, { flex: 1.5 }]}>
+                              <Text style={[styles.phoneText, { textAlign: 'center' }]} numberOfLines={1}>{customer.phoneNumber}</Text>
+                            </DataTable.Cell>
+                            <DataTable.Cell style={[styles.cell, { flex: 1 }]}>
+                              <Text style={[styles.phoneText, { textAlign: 'center' }]} numberOfLines={1}>{customer.dueAmount}</Text>
+                            </DataTable.Cell>
+                          </DataTable.Row>
+                        </TouchableOpacity>
+                      ))
+                    )}
+                  </DataTable>
+                  <CustomPagination
                     page={page}
                     numberOfPages={Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE)}
-                    onPageChange={(page) => setPage(page)}
-                    label={`${from + 1}-${to} of ${filteredCustomers.length}`}
-                    style={styles.pagination}
-                    showFastPaginationControls
-                    numberOfItemsPerPage={ITEMS_PER_PAGE}
-                    onItemsPerPageChange={() => {}}
-                    selectPageDropdownLabel={'Rows per page'}
+                    onPageChange={(newPage) => setPage(newPage)}
                   />
-                </DataTable>
+                </View>
               </PaperProvider>
             </Animated.View>
           </ScrollView>
@@ -296,6 +310,53 @@ export default function MilkManHomeScreen() {
                 onClose={() => setShowAddUser(false)}
                 onSubmit={handleAddUser}
               />
+            </Modal>
+
+            <Modal
+              visible={showCustomerDetails}
+              onDismiss={() => setShowCustomerDetails(false)}
+              contentContainerStyle={styles.customerDetailsModal}
+            >
+              {selectedCustomer && (
+                <View style={styles.customerDetailsContainer}>
+                  <View style={styles.customerDetailsHeader}>
+                    <View style={styles.titleContainer}>
+                      <Text style={styles.customerDetailsTitle}>Customer Details</Text>
+                    </View>
+                    <TouchableOpacity 
+                      onPress={() => setShowCustomerDetails(false)}
+                      style={styles.closeButton}
+                    >
+                      <MaterialCommunityIcons name="close" size={24} color="#1976D2" />
+                    </TouchableOpacity>
+                  </View>
+                  
+                  <ScrollView style={styles.customerDetailsScroll}>
+                    <View style={styles.customerDetailsContent}>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Name:</Text>
+                        <Text style={styles.detailValue} numberOfLines={1}>{selectedCustomer.name}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Phone:</Text>
+                        <Text style={styles.detailValue} numberOfLines={1}>{selectedCustomer.phoneNumber}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Address:</Text>
+                        <Text style={styles.detailValue} numberOfLines={2}>{selectedCustomer.address}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Due Amount:</Text>
+                        <Text style={styles.detailValue} numberOfLines={1}>{selectedCustomer.dueAmount}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Rate:</Text>
+                        <Text style={styles.detailValue} numberOfLines={1}>{selectedCustomer.milkRate}</Text>
+                      </View>
+                    </View>
+                  </ScrollView>
+                </View>
+              )}
             </Modal>
           </Portal>
         </View>
@@ -401,14 +462,16 @@ const styles = StyleSheet.create({
   },
   headerCell: {
     justifyContent: 'center',
+    alignItems: 'center',
   },
   headerText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#000000',
+    textAlign: 'center',
   },
   tableRow: {
-    height: 70,
+    height: 60,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
@@ -420,36 +483,25 @@ const styles = StyleSheet.create({
   },
   cell: {
     justifyContent: 'center',
+    alignItems: 'center',
   },
   customerName: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     color: '#000000',
-    marginBottom: 4,
+    marginBottom: 2,
+    textAlign: 'center',
   },
   phoneText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
     color: '#000000',
+    textAlign: 'center',
   },
   addressText: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#000000',
-    lineHeight: 18,
-  },
-  pagination: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderTopWidth: 1,
-    borderTopColor: '#E3F2FD',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    marginHorizontal: -8,
-    marginBottom: -8,
+    lineHeight: 16,
   },
   modalContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -501,5 +553,97 @@ const styles = StyleSheet.create({
   drawerItem: {
     backgroundColor: 'transparent',
     marginVertical: 4,
+  },
+  customerDetailsModal: {
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    padding: 0,
+    margin: 20,
+    borderRadius: 20,
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  customerDetailsContainer: {
+    width: '100%',
+    height: '100%',
+  },
+  customerDetailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3F2FD',
+    backgroundColor: '#FFFFFF',
+  },
+  titleContainer: {
+    flex: 1,
+    marginRight: 16,
+  },
+  customerDetailsTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#1976D2',
+  },
+  closeButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#E3F2FD',
+  },
+  customerDetailsScroll: {
+    flex: 1,
+  },
+  customerDetailsContent: {
+    padding: 20,
+    gap: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3F2FD',
+  },
+  detailLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    flex: 1,
+  },
+  detailValue: {
+    fontSize: 16,
+    color: '#1976D2',
+    flex: 2,
+    textAlign: 'right',
+    marginLeft: 16,
+  },
+  rowTouchable: {
+    width: '100%',
+  },
+  noDataContainer: {
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  noDataText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noDataSubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
 });

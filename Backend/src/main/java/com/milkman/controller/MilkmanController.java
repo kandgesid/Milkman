@@ -1,6 +1,7 @@
 package com.milkman.controller;
 
 import com.milkman.DTO.AddNewCustomerDTO;
+import com.milkman.DTO.CustomerInfoDTO;
 import com.milkman.DTO.MilkOrderResponseDTO;
 import com.milkman.model.Customer;
 import com.milkman.model.Milkman;
@@ -48,7 +49,7 @@ public class MilkmanController {
     @GetMapping("/myCustomers/{id}")
     ResponseEntity<?> getAllCustomersForMilkman(@PathVariable UUID id){
         try {
-            List<Customer> customers = customerService.getAllCustomersForMilkman(id);
+            List<CustomerInfoDTO> customers = customerService.getAllCustomersForMilkman(id);
             return ResponseEntity.ok(customers);
         }catch (Exception ex){
             System.out.println(ex.getMessage());
@@ -60,6 +61,7 @@ public class MilkmanController {
     ResponseEntity<?> getTodaysOrdersForMilkman(@PathVariable("milkmanId") UUID id){
        try{
            List<MilkOrderResponseDTO> orders = orderService.getTodaysOrdersForMilkman(id);
+           System.out.println("Todays orders for milkman " + orders.size());
            return ResponseEntity.status(HttpStatus.OK).body(orders);
        }catch (Exception ex){
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);

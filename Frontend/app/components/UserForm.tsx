@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -12,8 +12,8 @@ export default function UserForm({ visible, onClose, onSubmit }: UserFormProps) 
   const [phone, setPhone] = useState('');
   const [rate, setRate] = useState('');
   const [isValid, setIsValid] = useState(false);
-  const scaleAnim = new Animated.Value(0);
-  const slideAnim = new Animated.Value(100);
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(100)).current;
 
   useEffect(() => {
     if (visible) {
@@ -32,8 +32,18 @@ export default function UserForm({ visible, onClose, onSubmit }: UserFormProps) 
         }),
       ]).start();
     } else {
-      scaleAnim.setValue(0);
-      slideAnim.setValue(100);
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 100,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
   }, [visible]);
 
@@ -53,7 +63,7 @@ export default function UserForm({ visible, onClose, onSubmit }: UserFormProps) 
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType="none"
       transparent={true}
       onRequestClose={onClose}
     >

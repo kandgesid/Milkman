@@ -18,6 +18,8 @@ public interface OrderRepository extends JpaRepository<MilkOrder, UUID> {
     public List<MilkOrder> findByMilkmanCustomer_Milkman_Id(UUID milkmanId);
     public List<MilkOrder> findByMilkmanCustomerAndOrderDate(MilkmanCustomer milkmanCustomerId, LocalDate orderDate);
 
+    public List<MilkOrder> findByMilkmanCustomer(MilkmanCustomer milkmanCustomerId);
+
     @Query("""
     SELECT new com.milkman.DTO.MilkOrderResponseDTO(
         mc.id,

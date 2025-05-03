@@ -101,7 +101,6 @@ public class OrderService {
         MilkmanCustomer mc = milkmanCustomerRepository
                 .findById(milkmanCustomerId)
                 .orElseThrow(() -> new Exception("Customer not linked to Milkman"));
-
         List<MilkOrder> orders = orderRepository.findByMilkmanCustomerAndOrderDate(mc, orderDate);
         System.out.println("Orders to moved to history table : " + orders.stream().toString());
         if(orders.isEmpty()){
@@ -116,10 +115,47 @@ public class OrderService {
             order.setCreatedAt(LocalDateTime.now());
             order.setStatus("PENDING");
             order = orderRepository.save(order);
+
+
+            double orderAmount = qty * order.getRate();
+            double updatedDueAmount = mc.getDueAmount() + orderAmount;
+            int updatedRow = milkmanCustomerRepository.updateCustomerDueAmount(milkmanCustomerId, updatedDueAmount, LocalDateTime.now());
+            System.out.println("confirmOrderDelivery : "  + updatedRow);
             updateDeliveryStatusAndMoveToHistory(order, "DELIVERED", remark);
         }else{
             for(MilkOrder order : orders){
                 updateDeliveryStatusAndMoveToHistory(order, "DELIVERED", remark);
+            }
+        }
+    }
+
+    @Transactional
+    public void cancelOrderDelivery(final UUID milkmanCustomerId, final LocalDate orderDate, final String remark) throws Exception {
+        MilkmanCustomer mc = milkmanCustomerRepository
+                .findById(milkmanCustomerId)
+                .orElseThrow(() -> new Exception("Customer not linked to Milkman"));
+        List<MilkOrder> orders = orderRepository.findByMilkmanCustomerAndOrderDate(mc, orderDate);
+        System.out.println("Orders to moved to history table : " + orders.stream().toString());
+        if(orders.isEmpty()){
+            MilkOrder order = new MilkOrder();
+            order.setMilkmanCustomer(mc);
+            order.setOrderDate(orderDate);
+            double qty = mc.getCustomer().getDefaultMilkQty();
+            order.setQuantity(qty);
+            order.setNote("Default order");
+            order.setRate(mc.getMilkRate());
+            order.setAmount(qty * order.getRate());
+            order.setCreatedAt(LocalDateTime.now());
+            order.setStatus("PENDING");
+            order = orderRepository.save(order);
+            updateDeliveryStatusAndMoveToHistory(order, "NOT DELIVERED", remark);
+        }else{
+            for(MilkOrder order : orders){
+                double orderAmount = order.getQuantity() * order.getRate();
+                double updatedDueAmount = mc.getDueAmount() - orderAmount;
+                int updatedRow = milkmanCustomerRepository.updateCustomerDueAmount(milkmanCustomerId, updatedDueAmount, LocalDateTime.now());
+                System.out.println("cancelOrderDelivery : "  + updatedRow);
+                updateDeliveryStatusAndMoveToHistory(order, "NOT DELIVERED", remark);
             }
         }
     }
@@ -140,16 +176,6 @@ public class OrderService {
             throw new RuntimeException(ex);
         }
     }
-
-
-
-
-
-
-
-
-
-
 
     public List<OrderDTO> convertToOrderDTOs(List<MilkOrder> orders) {
         return orders.stream()

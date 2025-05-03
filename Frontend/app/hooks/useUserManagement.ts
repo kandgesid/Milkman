@@ -77,7 +77,7 @@ const useUserManagement = () => {
         password: submitData.password,
       });
       const token = response.data.token;
-      console.log(response.data);
+      // console.log(response.data); 
 
       if (token) {
         // Store the token for later API calls.
@@ -105,7 +105,7 @@ const useUserManagement = () => {
   const handleSubmit = useCallback(async (data?: User) => {
     try {
       const submitData = data || formData;
-      console.log(submitData)
+      // console.log(submitData)
       if (!submitData.name || !submitData.phoneNumber || !submitData.address || !submitData.email || !submitData.password || !submitData.confirmPassword) {
         Alert.alert('Validation Error', 'Please fill in all required fields');
         return;

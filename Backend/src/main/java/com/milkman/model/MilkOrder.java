@@ -103,4 +103,19 @@ public class MilkOrder {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    @Override
+    public String toString() {
+        return "MilkOrder{" +
+                "id=" + id +
+                ", milkmanCustomer=" + milkmanCustomer +
+                ", orderDate=" + orderDate +
+                ", quantity=" + quantity +
+                ", rate=" + rate +
+                ", amount=" + amount +
+                ", note='" + note + '\'' +
+                ", status='" + status + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

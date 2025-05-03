@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Animated, Text } from 'react-native';
+import { View, StyleSheet, Animated, Text, TouchableOpacity } from 'react-native';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
-import { Appbar, Drawer, DataTable, Portal, Modal, Button } from 'react-native-paper';
+import { Appbar, Drawer, DataTable, Portal, Modal, Button, PaperProvider } from 'react-native-paper';
 import { useLocalSearchParams, router } from 'expo-router';
 import useOrderManagement from '../hooks/useOrderManagement';
 import useUserManagement from '../hooks/useUserManagement';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import CustomPagination from '../components/CustomPagination';
 
 interface DrawerLayoutRef {
   openDrawer: () => void;
@@ -13,12 +16,24 @@ interface DrawerLayoutRef {
 
 export default function TodaysOrderScreen() {
   const { id } = useLocalSearchParams();
-  const { userId, setUserId, orders } = useOrderManagement();
+  const { userId, setUserId, orders, handleOrderConfirmation, handleOrderCancellation } = useOrderManagement();
   const { handleLogout } = useUserManagement();
 
   // Sorting state: only for 'name' and 'address'
   const [sortColumn, setSortColumn] = useState<'customerName' | 'customerAddress'>('customerName');
   const [sortDirection, setSortDirection] = useState<'ascending' | 'descending'>('ascending');
+
+  // Helper function to format date consistently
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC'
+    });
+  };
 
   // Animation value for the table container
   const animation = useRef(new Animated.Value(0)).current;
@@ -77,7 +92,13 @@ export default function TodaysOrderScreen() {
 
   const confirmOrder = () => {
     // Implement order confirmation logic here (e.g., update status or call an API)
+    console.log("confirmOrder");
     console.log('Order confirmed for:', selectedItem);
+    console.log('Order date being sent:', selectedItem.orderDate);
+    handleOrderConfirmation(selectedItem.milkmanCustomerId, {
+      orderDate: selectedItem.orderDate,
+      remark: 'Order confirmed'
+    });
     setModalVisible(false);
     setSelectedItem(null);
   };
@@ -85,38 +106,51 @@ export default function TodaysOrderScreen() {
   const cancelOrder = () => {
     // Implement order cancellation logic here
     console.log('Order cancelled for:', selectedItem);
+    console.log("cancelOrder");
+    console.log('Order cancelled for:', selectedItem);
+    console.log('Order date being sent:', selectedItem.orderDate);
+    handleOrderCancellation(selectedItem.milkmanCustomerId, {
+      orderDate: selectedItem.orderDate,
+      remark: 'Order canceled'
+    });
     setModalVisible(false);
     setSelectedItem(null);
   };
 
   const navigationView = () => (
-    <View style={styles.drawerContainer}>
-      <Drawer.Section title="Menu">
-        <Drawer.Item
-          label="My Customers"
-          icon="account-group"
-          active={false}
-          onPress={() => {
-            router.push(`/screens/milkmanHome?id=${userId}`);
-          }}
-        />
-        <Drawer.Item
-          label="Today's Order"
-          icon="calendar"
-          active={true}
-          onPress={() => {
-            router.push(`/screens/todaysOrder?id=${userId}`);
-          }}
-        />
-        <Drawer.Item
-          label="Settings"
-          icon="cog"
-          onPress={() => {
-            // Navigate to settings screen (if available)
-          }}
-        />
-      </Drawer.Section>
-    </View>
+    <PaperProvider theme={{ colors: { text: '#000000', primary: '#000000', onSurface: '#000000' } }}>
+      <View style={styles.drawerContainer}>
+        <View style={styles.drawerHeader}>
+          <MaterialCommunityIcons name="cow" size={40} color="#1976D2" style={styles.drawerIcon} />
+          <Text style={styles.drawerTitle}>MilkMate</Text>
+        </View>
+        <Drawer.Section title="Menu" style={styles.drawerSection} theme={{ colors: { text: '#000000', onSurfaceVariant: '#000000' } }}>
+          <Drawer.Item
+            label="My Customers"
+            icon="account-group"
+            active={false}
+            onPress={() => router.push(`/screens/milkmanHome?id=${userId}`)}
+            style={styles.drawerItem}
+            theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
+          />
+          <Drawer.Item
+            label="Today's Order"
+            icon="calendar"
+            active={true}
+            onPress={() => router.push(`/screens/todaysOrder?id=${userId}`)}
+            style={styles.drawerItem}
+            theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
+          />
+          <Drawer.Item
+            label="Settings"
+            icon="cog"
+            onPress={() => {}}
+            style={styles.drawerItem}
+            theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
+          />
+        </Drawer.Section>
+      </View>
+    </PaperProvider>
   );
 
   return (
@@ -126,182 +160,237 @@ export default function TodaysOrderScreen() {
       drawerPosition="left"
       renderNavigationView={navigationView}
     >
-      <View style={styles.container}>
-        {/* Appbar Header */}
-        <Appbar.Header style={styles.appbar}>
-          <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} />
-          <Appbar.Content title="Today's Order" />
-          <Appbar.Action icon="logout" onPress={handleLogoutButton} />
-        </Appbar.Header>
-
-        {/* Animated Table Container */}
-        <Animated.View
-          style={[
-            styles.tableContainer,
-            {
-              opacity: animation,
-              transform: [
-                {
-                  scale: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.9, 1],
-                  }),
-                },
-              ],
-            },
-          ]}
+      <PaperProvider theme={{ colors: { text: '#000000', primary: '#000000', onSurface: '#000000' } }}>
+        <LinearGradient
+          colors={['#FFFFFF', '#E3F2FD', '#BBDEFB']}
+          style={styles.background}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         >
-          <View style={styles.tableHeaderContainer}>
-            <Text style={styles.tableTitle}>Today's Orders</Text>
-            <Text style={styles.tableSubtitle}>{sortedOrders.length} orders to process</Text>
-          </View>
-          
-          <DataTable>
-            <DataTable.Header style={styles.tableHeader}>
-              <DataTable.Title
-                sortDirection={sortColumn === 'customerName' ? sortDirection : undefined}
-                onPress={() => handleSort('customerName')}
-                style={styles.headerCell}
-                textStyle={styles.headerText}
-              >
-                Customer
-              </DataTable.Title>
-              <DataTable.Title
-                style={styles.headerCell}
-                textStyle={styles.headerText}
-              >
-                Quantity
-              </DataTable.Title>
-              <DataTable.Title
-                sortDirection={sortColumn === 'customerAddress' ? sortDirection : undefined}
-                onPress={() => handleSort('customerAddress')}
-                style={styles.headerCell}
-                textStyle={styles.headerText}
-              >
-                Address
-              </DataTable.Title>
-            </DataTable.Header>
+          <View style={styles.container}>
+            <Appbar.Header style={styles.appbar}>
+              <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} />
+              <Appbar.Content title="Today's Order" titleStyle={styles.appbarTitle} />
+              <Appbar.Action icon="logout" onPress={handleLogoutButton} />
+            </Appbar.Header>
 
-            {sortedOrders.slice(from, to).map((item, index) => (
-              <DataTable.Row 
-                key={item.milkmanCustomerId?.toString()} 
-                onPress={() => onRowPress(item)}
-                style={[
-                  styles.tableRow,
-                  index % 2 === 0 ? styles.evenRow : styles.oddRow
-                ]}
-              >
-                <DataTable.Cell style={styles.cell}>
-                  <View style={styles.customerCell}>
-                    <Text style={styles.customerName}>{item.customerName}</Text>
-                    <Text style={styles.orderDate}>
-                      {item.orderDate ? new Date(item.orderDate).toLocaleDateString() : 'N/A'}
-                    </Text>
-                  </View>
-                </DataTable.Cell>
-                <DataTable.Cell style={styles.cell}>
-                  <View style={styles.quantityCell}>
-                    <Text style={styles.quantityText}>{item.milkQuantity}</Text>
-                    <Text style={styles.quantityUnit}>liters</Text>
-                  </View>
-                </DataTable.Cell>
-                <DataTable.Cell style={styles.cell}>
-                  <Text style={styles.addressText} numberOfLines={2}>
-                    {item.customerAddress}
-                  </Text>
-                </DataTable.Cell>
-              </DataTable.Row>
-            ))}
-
-            <DataTable.Pagination
-              page={page}
-              numberOfPages={Math.ceil(sortedOrders.length / rowsPerPage)}
-              onPageChange={(page) => setPage(page)}
-              label={`${from + 1}-${to} of ${sortedOrders.length}`}
-              style={styles.pagination}
-            />
-          </DataTable>
-        </Animated.View>
-
-        {/* Modal for Confirm/Cancel Order */}
-        <Portal>
-          <Modal
-            visible={modalVisible}
-            onDismiss={() => setModalVisible(false)}
-            contentContainerStyle={styles.modalContainer}
-          >
-            <View style={styles.cardContainer}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Order Details</Text>
-                <Text style={styles.orderStatus}>{selectedItem?.status}</Text>
+            {/* Animated Table Container */}
+            <Animated.View
+              style={[
+                styles.tableContainer,
+                {
+                  opacity: animation,
+                  transform: [
+                    {
+                      scale: animation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.9, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <View style={styles.tableHeaderContainer}>
+                <Text style={styles.tableTitle}>Today's Orders</Text>
+                <Text style={styles.tableSubtitle}>{sortedOrders.length} orders to process</Text>
               </View>
-              <View style={styles.cardContent}>
-                <View style={styles.detailSection}>
-                  <Text style={styles.sectionTitle}>Customer Information</Text>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Name:</Text>
-                    <Text style={styles.detailValue}>{selectedItem?.customerName}</Text>
-                  </View>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Address:</Text>
-                    <Text style={styles.detailValue}>{selectedItem?.customerAddress}</Text>
-                  </View>
-                </View>
+              
+              <DataTable>
+                <DataTable.Header style={styles.tableHeader}>
+                  <DataTable.Title
+                    sortDirection={sortColumn === 'customerName' ? sortDirection : undefined}
+                    onPress={() => handleSort('customerName')}
+                    style={styles.headerCell}
+                    textStyle={styles.headerText}
+                  >
+                    Customer
+                  </DataTable.Title>
+                  <DataTable.Title
+                    style={styles.headerCell}
+                    textStyle={styles.headerText}
+                  >
+                    Quantity
+                  </DataTable.Title>
+                  <DataTable.Title
+                    sortDirection={sortColumn === 'customerAddress' ? sortDirection : undefined}
+                    onPress={() => handleSort('customerAddress')}
+                    style={styles.headerCell}
+                    textStyle={styles.headerText}
+                  >
+                    Address
+                  </DataTable.Title>
+                </DataTable.Header>
 
-                <View style={styles.detailSection}>
-                  <Text style={styles.sectionTitle}>Order Information</Text>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Order Date:</Text>
-                    <Text style={styles.detailValue}>
-                      {selectedItem?.orderDate ? new Date(selectedItem.orderDate).toLocaleDateString() : 'N/A'}
-                    </Text>
+                {sortedOrders.length === 0 ? (
+                  <View style={styles.noDataContainer}>
+                    <MaterialCommunityIcons name="calendar-blank" size={48} color="#BBDEFB" />
+                    <Text style={styles.noDataText}>No orders for today</Text>
+                    <Text style={styles.noDataSubtext}>Check back later for new orders</Text>
                   </View>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Quantity:</Text>
-                    <Text style={styles.detailValue}>{selectedItem?.milkQuantity || 0} liters</Text>
-                  </View>
-                </View>
-
-                {selectedItem?.note && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.sectionTitle}>Additional Notes</Text>
-                    <View style={styles.noteContainer}>
-                      <Text style={styles.noteText}>{selectedItem.note}</Text>
-                    </View>
-                  </View>
+                ) : (
+                  sortedOrders.slice(from, to).map((item, index) => (
+                    <DataTable.Row 
+                      key={item.milkmanCustomerId?.toString()} 
+                      onPress={() => onRowPress(item)}
+                      style={[
+                        styles.tableRow,
+                        index % 2 === 0 ? styles.evenRow : styles.oddRow
+                      ]}
+                    >
+                      <DataTable.Cell style={styles.cell}>
+                        <View style={styles.customerCell}>
+                          <Text style={styles.customerName}>{item.customerName}</Text>
+                          <Text style={styles.orderDate}>
+                            {item.orderDate ? formatDate(item.orderDate) : 'N/A'}
+                          </Text>
+                        </View>
+                      </DataTable.Cell>
+                      <DataTable.Cell style={styles.cell}>
+                        <View style={styles.quantityCell}>
+                          <Text style={styles.quantityText}>{item.milkQuantity}</Text>
+                          <Text style={styles.quantityUnit}>liters</Text>
+                        </View>
+                      </DataTable.Cell>
+                      <DataTable.Cell style={styles.cell}>
+                        <Text style={styles.addressText} numberOfLines={2}>
+                          {item.customerAddress}
+                        </Text>
+                      </DataTable.Cell>
+                    </DataTable.Row>
+                  ))
                 )}
-              </View>
-              <View style={styles.cardActions}>
-                <Button 
-                  mode="contained" 
-                  onPress={confirmOrder} 
-                  style={[styles.button, styles.confirmButton]}
-                >
-                  Confirm Order
-                </Button>
-                <Button 
-                  mode="outlined" 
-                  onPress={cancelOrder} 
-                  style={[styles.button, styles.cancelButton]}
-                >
-                  Cancel Order
-                </Button>
-              </View>
-            </View>
-          </Modal>
-        </Portal>
-      </View>
+              </DataTable>
+
+              {sortedOrders.length > 0 && (
+                <CustomPagination
+                  page={page}
+                  numberOfPages={Math.ceil(sortedOrders.length / rowsPerPage)}
+                  onPageChange={(page) => setPage(page)}
+                />
+              )}
+            </Animated.View>
+
+            {/* Modal for Confirm/Cancel Order */}
+            <Portal>
+              <Modal
+                visible={modalVisible}
+                onDismiss={() => setModalVisible(false)}
+                contentContainerStyle={styles.modalContainer}
+              >
+                <View style={styles.cardContainer}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle}>Order Details</Text>
+                    <Text style={styles.orderStatus}>{selectedItem?.status}</Text>
+                  </View>
+                  <View style={styles.cardContent}>
+                    <View style={styles.detailSection}>
+                      <Text style={styles.sectionTitle}>Customer Information</Text>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Name:</Text>
+                        <Text style={styles.detailValue}>{selectedItem?.customerName}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Address:</Text>
+                        <Text style={styles.detailValue}>{selectedItem?.customerAddress}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.detailSection}>
+                      <Text style={styles.sectionTitle}>Order Information</Text>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Order Date:</Text>
+                        <Text style={styles.detailValue}>
+                          {selectedItem?.orderDate ? formatDate(selectedItem.orderDate) : 'N/A'}
+                        </Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Quantity:</Text>
+                        <Text style={styles.detailValue}>{selectedItem?.milkQuantity || 0} liters</Text>
+                      </View>
+                    </View>
+
+                    {selectedItem?.note && (
+                      <View style={styles.detailSection}>
+                        <Text style={styles.sectionTitle}>Additional Notes</Text>
+                        <View style={styles.noteContainer}>
+                          <Text style={styles.noteText}>{selectedItem.note}</Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.cardActions}>
+                    <Button 
+                      mode="contained" 
+                      onPress={confirmOrder} 
+                      style={[styles.button, styles.confirmButton]}
+                    >
+                      Confirm Order
+                    </Button>
+                    <Button 
+                      mode="outlined" 
+                      onPress={cancelOrder} 
+                      style={[styles.button, styles.cancelButton]}
+                    >
+                      Cancel Order
+                    </Button>
+                  </View>
+                </View>
+              </Modal>
+            </Portal>
+          </View>
+        </LinearGradient>
+      </PaperProvider>
     </DrawerLayout>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: 'transparent',
   },
   appbar: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    elevation: 0,
+  },
+  appbarTitle: {
+    color: '#1976D2',
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  drawerContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingTop: 40,
+  },
+  drawerHeader: {
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3F2FD',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  drawerIcon: {
+    marginRight: 16,
+  },
+  drawerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  drawerSection: {
+    marginTop: 16,
+    backgroundColor: 'transparent',
+  },
+  drawerItem: {
+    backgroundColor: 'transparent',
+    marginVertical: 4,
   },
   tableContainer: {
     margin: 16,
@@ -314,11 +403,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
-  },
-  drawerContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 40,
   },
   modalContainer: {
     backgroundColor: 'transparent',
@@ -485,9 +569,22 @@ const styles = StyleSheet.create({
     color: '#495057',
     lineHeight: 18,
   },
-  pagination: {
-    backgroundColor: '#f8f9fa',
-    borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
+  noDataContainer: {
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  noDataText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noDataSubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
 });

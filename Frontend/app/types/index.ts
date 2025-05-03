@@ -23,19 +23,32 @@ export interface Customer {
   email: string;
   phoneNumber: string;
   address: string;
-  noOfFamilyMembers: number;
-  dailyMilkRequired: number;
-  rate?: string;
+  familySize: number;
+  defaultMilkQty: number;
+  milkRate: number;
+  dueAmount: number;
 }
 
 export interface Order{
     milkmanCustomerId: string;
     customerName: string;
     note: string;
-    orderDate: Date;
+    orderDate: string;
     milkQuantity: number;
     status: string;
     customerAddress: string;
+}
+
+export interface MyOrder{
+    milkmanCustomerId: string;
+    orderId: string;
+    milkmanName: string;
+    note: string;
+    orderDate: string;
+    quantity: number;
+    status: string;
+    rate: number;
+    amount: number;
 }
 
 export interface Milkman {
@@ -44,6 +57,15 @@ export interface Milkman {
   email: string;
   phoneNumber: string;
   address: string;
+  milkRate: number;
+  dueAmount: number;
+}
+
+export interface newOrder {
+  customerId: string;
+  milkmanId: string;
+  requestedQuantity: number;
+  orderDate: Date;
 }
 
 export interface newCustomer {
@@ -51,6 +73,16 @@ export interface newCustomer {
   rate: string;
   milkManId: string;
 }
+
+  export interface confirmOrder {
+    orderDate: String;
+    remark?: string;
+  }
+
+  export interface cancleOrder {
+    orderDate: String;
+    remark?: string;
+  }
 
 export interface UserFormProps {
   formData: Milkman;

@@ -6,17 +6,19 @@ import { Milkman, newCustomer, User, Order, Customer } from '../types';
 
 const API_URL = 'http://10.0.0.158:8080';
 
-const useMilkManagement = () => {
-  const [customers, setCutomers] = useState<Customer[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+const useCustomerManagement = () => {
+  const [milkmans, setUsers] = useState<Milkman[]>([]);
+  const [customerId, setCustomerId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null); // if you need role as well
-  const [formData, setFormData] = useState<Milkman>({
+  const [formData, setFormData] = useState<Customer>({
     name: '',
     email: '',
     phoneNumber: '',
     address: '',
+    familySize: 0,
+    defaultMilkQty: 0,
     milkRate: 0,
-    dueAmount: 0,
+    dueAmount: 0
   });
 
   const [newCustomerFormData, setNewCustomerFormData] = useState<newCustomer>({
@@ -28,38 +30,37 @@ const useMilkManagement = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchUsers = useCallback(async () => {
-    console.log("useMilkManagement : " + userId);
-    if (!userId) return;
+    // console.log("useCustomerManagement : " + customerId);
+    if (!customerId) return;
     try {
-      // console.log("fetchUser : " + userId);
-      const response = await instacnce.get(`${API_URL}/api/milkman/myCustomers/${userId}`);
-      // console.log(response.data);
-      setCutomers(response.data);
-      // for (let i = 0; i < response.data.length; i++) {
-      //   console.log(response.data[i].milkRate);
-      // }
+      // console.log("fetchUser : " + customerId);
+      const response = await instacnce.get(`${API_URL}/api/customer/myMilkmans/${customerId}`);
+      console.log(response.data);
+      setUsers(response.data);
     } catch (error) {
       Alert.alert(
         'Error',
         'Failed to fetch users. Please check your connection and try again.'
       );
     }
-  }, [userId]);
+  }, [customerId]);
 
   useEffect(() => {
-    if (userId) {
+    if (customerId) {
       fetchUsers();
     }
-  }, [userId, fetchUsers]);
+  }, [customerId, fetchUsers]);
 
   const resetForm = useCallback(() => {
     setFormData({
-      name: '',
-      email: '',
-      phoneNumber: '',
-      address: '',
-      milkRate: 0,
-      dueAmount: 0,
+        name: '',
+        email: '',
+        phoneNumber: '',
+        address: '',
+        familySize: 0,
+        defaultMilkQty: 0, 
+        milkRate: 0,
+        dueAmount: 0
     });
     setEditingId(null);
   }, []);
@@ -123,14 +124,14 @@ const useMilkManagement = () => {
     }
   }, [formData, editingId, resetForm, fetchUsers]);
 
-  const handleEdit = useCallback((user: User) => {
-    setFormData(user as unknown as Milkman);
-    setEditingId(user.id!);
-  }, []);
+//   const handleEdit = useCallback((user: User) => {
+//     setFormData(user);
+//     setEditingId(user.id!);
+//   }, []);
 
   const handleDelete = useCallback(async (id: number) => {
     try {
-      await instacnce.delete(`${API_URL}/api/milkman/${id}`);
+      await instacnce.delete(`${API_URL}/api/customer/${id}`);
       Alert.alert('Success', 'User deleted successfully');
       fetchUsers();
     } catch (error) {
@@ -139,18 +140,18 @@ const useMilkManagement = () => {
   }, [fetchUsers]);
 
   return {
-    customers,
+    milkmans,
     formData,
     editingId,
-    userId,
+    userId: customerId,
     setFormData,
     handleSubmit,
-    handleEdit,
+    // handleEdit,
     handleDelete,
-    setUserId,
+    setUserId: setCustomerId,
     setUserRole,
     handleAddCustomer
   };
 };
 
-export default useMilkManagement; 
+export default useCustomerManagement; 
