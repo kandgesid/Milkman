@@ -31,6 +31,7 @@ export interface Customer {
 
 export interface Order{
     milkmanCustomerId: string;
+    orderId: string;
     customerName: string;
     note: string;
     orderDate: string;

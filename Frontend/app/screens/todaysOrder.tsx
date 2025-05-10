@@ -95,7 +95,7 @@ export default function TodaysOrderScreen() {
     console.log("confirmOrder");
     console.log('Order confirmed for:', selectedItem);
     console.log('Order date being sent:', selectedItem.orderDate);
-    handleOrderConfirmation(selectedItem.milkmanCustomerId, {
+    handleOrderConfirmation(selectedItem.orderId, {
       orderDate: selectedItem.orderDate,
       remark: 'Order confirmed'
     });
@@ -109,7 +109,7 @@ export default function TodaysOrderScreen() {
     console.log("cancelOrder");
     console.log('Order cancelled for:', selectedItem);
     console.log('Order date being sent:', selectedItem.orderDate);
-    handleOrderCancellation(selectedItem.milkmanCustomerId, {
+    handleOrderCancellation(selectedItem.orderId, {
       orderDate: selectedItem.orderDate,
       remark: 'Order canceled'
     });

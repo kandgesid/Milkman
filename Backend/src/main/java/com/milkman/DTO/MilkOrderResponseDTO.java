@@ -11,9 +11,18 @@ public class MilkOrderResponseDTO {
     private double milkQuantity;
     private String status;
     private String customerAddress;
+    private UUID orderId;
+
+    public UUID getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(UUID orderId) {
+        this.orderId = orderId;
+    }
 
     public MilkOrderResponseDTO(UUID milkmanCustomerId, String customerName, String note, LocalDate orderDate,
-                    double milkQuantity, String status, String customerAddress) {
+                                double milkQuantity, String status, String customerAddress, UUID orderId) {
         this.milkmanCustomerId = milkmanCustomerId;
         this.customerName = customerName;
         this.note = note;
@@ -21,7 +30,10 @@ public class MilkOrderResponseDTO {
         this.milkQuantity = milkQuantity;
         this.status = status;
         this.customerAddress = customerAddress;
+        this.orderId = orderId;
     }
+
+    public MilkOrderResponseDTO() {}
     public String getCustomerName() {
         return customerName;
     }

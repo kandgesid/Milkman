@@ -1,5 +1,6 @@
 package com.milkman.service;
 
+import com.milkman.DAO.OrderServiceDAO;
 import com.milkman.DTO.MilkOrderRequestDTO;
 import com.milkman.DTO.MilkOrderResponseDTO;
 import com.milkman.DTO.OrderDTO;
@@ -32,6 +33,9 @@ public class OrderService {
     @Autowired
     public MilkmanCustomerRepository milkmanCustomerRepository;
 
+    @Autowired
+    public OrderServiceDAO orderServiceDAO;
+
     public OrderDTO getOrderById(UUID id) throws Exception {
         MilkOrder order = orderRepository.findById(id)
                 .orElseThrow(() -> new Exception("Order not found: " + id));
@@ -49,7 +53,7 @@ public class OrderService {
 
     public List<MilkOrderResponseDTO> getTodaysOrdersForMilkman(UUID milkmanId){
         try{
-            return orderRepository.getOrdersToBeDelivered(milkmanId, LocalDate.now());
+            return orderServiceDAO.getTodaysOrdersByMilkman(milkmanId);
         }catch(Exception ex){
             throw new RuntimeException("Error while fetching today's milk orders");
         }
@@ -86,86 +90,54 @@ public class OrderService {
             MilkOrder savedOrder = orderRepository.save(newOrder);
             System.out.println(savedOrder.toString());
             System.out.println("UPDATE THE DUE AMOUNT : " + associationOpt.get().getId() + " " + updatedDueAmount + " " + LocalDateTime.now());
-            int updatedRow = milkmanCustomerRepository.updateCustomerDueAmount(associationOpt.get().getId(), updatedDueAmount, LocalDateTime.now());
-            System.out.println(updatedRow);
+            MilkmanCustomer mc = associationOpt.get();
+            mc.setDueAmount(updatedDueAmount);
+            mc.setLastUpdated(LocalDateTime.now());
+            milkmanCustomerRepository.save(mc);
             return savedOrder.getId();
         }catch (Exception ex){
             System.err.println("Failed to save Order: " + ex.getMessage());
-            // Optionally, wrap it in a custom exception:
             throw new RuntimeException("Unable to save order record", ex);
         }
     }
 
+
     @Transactional
-    public void confirmOrderDelivery(final UUID milkmanCustomerId, final LocalDate orderDate, final String remark) throws Exception {
-        MilkmanCustomer mc = milkmanCustomerRepository
-                .findById(milkmanCustomerId)
-                .orElseThrow(() -> new Exception("Customer not linked to Milkman"));
-        List<MilkOrder> orders = orderRepository.findByMilkmanCustomerAndOrderDate(mc, orderDate);
-        System.out.println("Orders to moved to history table : " + orders.stream().toString());
-        if(orders.isEmpty()){
-            MilkOrder order = new MilkOrder();
-            order.setMilkmanCustomer(mc);
-            order.setOrderDate(orderDate);
-            double qty = mc.getCustomer().getDefaultMilkQty();
-            order.setQuantity(qty);
-            order.setNote("Default order");
-            order.setRate(mc.getMilkRate());
-            order.setAmount(qty * order.getRate());
-            order.setCreatedAt(LocalDateTime.now());
-            order.setStatus("PENDING");
-            order = orderRepository.save(order);
-
-
-            double orderAmount = qty * order.getRate();
-            double updatedDueAmount = mc.getDueAmount() + orderAmount;
-            int updatedRow = milkmanCustomerRepository.updateCustomerDueAmount(milkmanCustomerId, updatedDueAmount, LocalDateTime.now());
-            System.out.println("confirmOrderDelivery : "  + updatedRow);
-            updateDeliveryStatusAndMoveToHistory(order, "DELIVERED", remark);
-        }else{
-            for(MilkOrder order : orders){
-                updateDeliveryStatusAndMoveToHistory(order, "DELIVERED", remark);
-            }
+    public void confirmOrderDelivery(final UUID orderId, final LocalDate orderDate, final String remark) throws Exception {
+        try{
+            MilkOrder mo = orderRepository.findById(orderId).orElseThrow(() -> new Exception("Invalid orderId"));
+            System.out.println("Order found" + mo.toString());
+            updateDeliveryStatusAndMoveToHistory(mo, "DELIVERED", remark);
+        }catch (Exception ex){
+            System.err.println("Failed to update confirm order delivery: " + ex.getMessage());
+            throw new RuntimeException("Failed to update confirm order delivery", ex);
         }
     }
 
     @Transactional
-    public void cancelOrderDelivery(final UUID milkmanCustomerId, final LocalDate orderDate, final String remark) throws Exception {
-        MilkmanCustomer mc = milkmanCustomerRepository
-                .findById(milkmanCustomerId)
-                .orElseThrow(() -> new Exception("Customer not linked to Milkman"));
-        List<MilkOrder> orders = orderRepository.findByMilkmanCustomerAndOrderDate(mc, orderDate);
-        System.out.println("Orders to moved to history table : " + orders.stream().toString());
-        if(orders.isEmpty()){
-            MilkOrder order = new MilkOrder();
-            order.setMilkmanCustomer(mc);
-            order.setOrderDate(orderDate);
-            double qty = mc.getCustomer().getDefaultMilkQty();
-            order.setQuantity(qty);
-            order.setNote("Default order");
-            order.setRate(mc.getMilkRate());
-            order.setAmount(qty * order.getRate());
-            order.setCreatedAt(LocalDateTime.now());
-            order.setStatus("PENDING");
-            order = orderRepository.save(order);
-            updateDeliveryStatusAndMoveToHistory(order, "NOT DELIVERED", remark);
-        }else{
-            for(MilkOrder order : orders){
-                double orderAmount = order.getQuantity() * order.getRate();
-                double updatedDueAmount = mc.getDueAmount() - orderAmount;
-                int updatedRow = milkmanCustomerRepository.updateCustomerDueAmount(milkmanCustomerId, updatedDueAmount, LocalDateTime.now());
-                System.out.println("cancelOrderDelivery : "  + updatedRow);
-                updateDeliveryStatusAndMoveToHistory(order, "NOT DELIVERED", remark);
-            }
+    public void cancelOrderDelivery(final UUID orderId, final LocalDate orderDate, final String remark) throws Exception {
+        try{
+            MilkOrder mo = orderRepository.findById(orderId).orElseThrow(() -> new Exception("Invalid orderId"));
+            System.out.println("Order found" + mo.toString());
+            MilkmanCustomer mc = mo.getMilkmanCustomer();
+            double orderAmount = mo.getQuantity() * mo.getRate();
+            double updatedDueAmount = mc.getDueAmount() - orderAmount;
+            mc.setLastUpdated(LocalDateTime.now());
+            mc.setDueAmount(updatedDueAmount);
+            milkmanCustomerRepository.save(mc);
+            updateDeliveryStatusAndMoveToHistory(mo, "NOT DELIVERED", remark);
+        }catch (Exception ex){
+            System.err.println("Failed to update cancel order delivery: " + ex.getMessage());
+            throw new RuntimeException("Failed to update cancel order delivery", ex);
         }
+
     }
 
     private void updateDeliveryStatusAndMoveToHistory(final MilkOrder order, final String status, final String remark){
         try{
-            int updatedRow = orderRepository.updateOrderStatus(order.getId(), status);
-            if(updatedRow == 0){
-                throw new RuntimeException("Order not found or status update failed");
-            }
+            order.setStatus(status);
+            orderRepository.save(order);
+
             OrderHistory history = new OrderHistory();
             history.setMilkOrder(order);
             history.setDeliveryDate(LocalDateTime.now());
