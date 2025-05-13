@@ -2,10 +2,13 @@ package com.milkman.controller;
 
 import com.milkman.DTO.MilkmanInfoDTO;
 import com.milkman.DTO.MyOrdersResDTO;
+import com.milkman.DTO.UpdateMyOrderReqDTO;
 import com.milkman.model.Customer;
+import com.milkman.model.MilkOrder;
 import com.milkman.service.CustomerService;
 import com.milkman.service.MilkmanService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,6 +57,27 @@ public class CustomerController {
             List<MyOrdersResDTO> myOrders = customerService.getAllMyOrders(id);
             System.out.println( "MyOrders: " + myOrders.size());
             return ResponseEntity.ok(myOrders);
+        }catch (Exception ex){
+            return ResponseEntity.internalServerError().body(ex);
+        }
+    }
+
+    @PostMapping ("/updateMyOrder/{id}")
+    ResponseEntity<?> updateMyOrders(@PathVariable UUID id, @RequestBody UpdateMyOrderReqDTO request){
+        try {
+            MilkOrder order = customerService.updateMyOrder(id, request);
+            return ResponseEntity.ok(order.getId());
+        }catch (Exception ex){
+            return ResponseEntity.internalServerError().body(ex);
+        }
+    }
+
+    @PostMapping("/cancelMyOrder/{id}")
+    ResponseEntity<?> cancelMyOrder(@PathVariable UUID id){
+        try {
+            System.out.println( "CancelMyOrder: " + id);
+            customerService.cancelMyOrder(id);
+            return ResponseEntity.ok(HttpStatus.OK);
         }catch (Exception ex){
             return ResponseEntity.internalServerError().body(ex);
         }

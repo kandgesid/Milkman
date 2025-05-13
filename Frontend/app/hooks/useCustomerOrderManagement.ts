@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import instacnce from '../auth/axiosConfig';
-import { MyOrder, confirmOrder, newOrder } from '../types';
+import { MyOrder, newOrder, editMyOrder } from '../types';
 import { router } from 'expo-router';
-const API_URL = 'http://10.0.0.158:8080';
+const API_URL = 'http://172.31.20.122:8080';
 
 const useCustomerOrderManagement = () => {
   const [myOrders, setMyOrders] = useState<MyOrder[]>([]);
@@ -57,36 +57,34 @@ const useCustomerOrderManagement = () => {
     }
   }
 
-  const handleOrderConfirmation = async (id: string, data: confirmOrder) => {
+  const handleOrderEdit = async (id: string, data: editMyOrder) => {
 
-    console.log("handleOrderConfirmation : " + id);
+    console.log("handleMyOrderEdit : " + id);
     console.log(data);
     try {
-      const response = await instacnce.post(`${API_URL}/api/order/milkman-customer/${id}/deliveries`, data);
+      const response = await instacnce.post(`${API_URL}/api/customer/updateMyOrder/${id}`, data);
       if(response.status === 200){
-        Alert.alert('Success', 'Order confirmed successfully');
-        fetchOrders();
+        Alert.alert('Success', 'Order updated successfully');
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to confirm order. Please check your connection and try again.');
+      Alert.alert('Error', 'Failed to update order. Please check your connection and try again.');
       console.log(error);
-      fetchOrders();
+      
     }
   }
 
-  const handleOrderCancellation = async (id: string, data: confirmOrder) => {
+  const handleOrderCancellation = async (id: string) => {
 
     console.log("handleOrderCancellation : " + id);
-    console.log(data);
     try {
-      const response = await instacnce.post(`${API_URL}/api/order/milkman-customer/${id}/cancelOrder`, data);
+      const response = await instacnce.post(`${API_URL}/api/customer/cancelMyOrder/${id}`);
       if(response.status === 200){
         Alert.alert('Success', 'Order cancelled successfully');
-        fetchOrders();
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to cancel order. Please check your connection and try again.');
       console.log(error);
+    }finally{
       fetchOrders();
     }
   }
@@ -96,7 +94,7 @@ const useCustomerOrderManagement = () => {
     userId,
     setUserId,
     setUserRole,
-    handleOrderConfirmation,
+    handleOrderEdit,
     handlePlaceOrder,
     handleOrderCancellation,
   };

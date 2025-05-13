@@ -2,6 +2,7 @@ package com.milkman.controller;
 
 import com.milkman.DTO.CustomerInfoDTO;
 import com.milkman.DTO.GetHistoryDTO;
+import com.milkman.DTO.MilkmanHistoryResponseDTO;
 import com.milkman.model.Milkman;
 import com.milkman.model.MilkmanCustomer;
 import com.milkman.repository.MilkmanCustomerRepository;
@@ -24,12 +25,11 @@ public class HistoryController {
     @Autowired
     HistoryService historyService;
 
-    @GetMapping("/getHistory/")
-    ResponseEntity<?> getAllCustomersForMilkman(@RequestBody GetHistoryDTO request) {
+    @GetMapping("/milkman/getHistory/")
+    ResponseEntity<?> getHistoryForMilkmanAndCutomer(@RequestBody GetHistoryDTO request) {
         try {
-//            List<CustomerInfoDTO> customers = .getAllCustomersForMilkman(id);
-//            historyService
-            return ResponseEntity.ok(null);
+            List<MilkmanHistoryResponseDTO> result= historyService.getHistory(request);
+            return ResponseEntity.ok(result);
         }catch (Exception ex){
             System.out.println(ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);

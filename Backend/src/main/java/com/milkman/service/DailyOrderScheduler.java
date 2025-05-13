@@ -30,7 +30,7 @@ public class DailyOrderScheduler {
         this.userRepo    = userRepo;
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *", zone = "America/Los_Angeles")
     @Transactional
     public void rollOverOrders() {
         LocalDate today     = LocalDate.now();

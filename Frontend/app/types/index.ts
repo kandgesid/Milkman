@@ -85,6 +85,11 @@ export interface newCustomer {
     remark?: string;
   }
 
+  export interface editMyOrder {
+    requestedQuantity: number;
+    note: string;
+  }
+
 export interface UserFormProps {
   formData: Milkman;
   setFormData: (user: Milkman) => void;

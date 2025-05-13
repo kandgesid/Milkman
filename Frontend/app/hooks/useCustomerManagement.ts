@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 import instacnce from '../auth/axiosConfig';
 import { Milkman, newCustomer, User, Order, Customer } from '../types';
 
-const API_URL = 'http://10.0.0.158:8080';
+const API_URL = 'http://172.31.20.122:8080';
 
 const useCustomerManagement = () => {
   const [milkmans, setUsers] = useState<Milkman[]>([]);

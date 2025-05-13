@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.UUID;
 
 public class GetHistoryDTO {
-    LocalDateTime toDate;
-    LocalDateTime fromDate;
+    String toDate;
+    String fromDate;
     UUID customerId;
     UUID milkmanId;
 
@@ -26,19 +26,19 @@ public class GetHistoryDTO {
         this.customerId = customerId;
     }
 
-    public LocalDateTime getToDate() {
+    public String getToDate() {
         return toDate;
     }
 
-    public void setToDate(LocalDateTime toDate) {
+    public void setToDate(String toDate) {
         this.toDate = toDate;
     }
 
-    public LocalDateTime getFromDate() {
+    public String getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(LocalDateTime fromDate) {
+    public void setFromDate(String fromDate) {
         this.fromDate = fromDate;
     }
 }

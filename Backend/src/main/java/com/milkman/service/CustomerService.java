@@ -3,6 +3,7 @@ package com.milkman.service;
 import com.milkman.DTO.CustomerInfoDTO;
 import com.milkman.DTO.MilkmanInfoDTO;
 import com.milkman.DTO.MyOrdersResDTO;
+import com.milkman.DTO.UpdateMyOrderReqDTO;
 import com.milkman.model.Customer;
 import com.milkman.model.MilkOrder;
 import com.milkman.model.MilkmanCustomer;
@@ -12,6 +13,7 @@ import com.milkman.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,6 +56,49 @@ public class CustomerService {
                 .flatMap(mc -> orderRepository.findByMilkmanCustomer(mc).stream())
                 .map(this::toMyOrderDto)
                 .toList();
+    }
+
+    public MilkOrder updateMyOrder(UUID orderId, UpdateMyOrderReqDTO request){
+        try{
+            MilkOrder order =  orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+            if(request.getRequestedQuantity() != order.getQuantity()){
+                MilkmanCustomer mc = order.getMilkmanCustomer();
+                double currQyt = order.getQuantity();
+                double currAmt = order.getRate() * currQyt;
+                double newQyt = request.getRequestedQuantity();
+                double newAmt = order.getRate() * newQyt;
+                double updatedAmt = mc.getDueAmount() - currAmt + newAmt;
+                mc.setDueAmount(updatedAmt);
+                mc.setLastUpdated(LocalDateTime.now());
+                milkmanCustomerRepository.save(mc);
+                order.setQuantity(newQyt);
+                order.setAmount(newAmt);
+            }
+            if(!request.getNote().isEmpty()){
+                order.setNote(request.getNote());
+            }
+            return orderRepository.save(order);
+        }catch (RuntimeException e){
+            throw new RuntimeException("Error while updating my order", e);
+        }
+
+    }
+
+    public void cancelMyOrder(UUID orderId){
+        try{
+            MilkOrder order =  orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+            MilkmanCustomer mc = order.getMilkmanCustomer();
+            double currQyt = order.getQuantity();
+            double currAmt = order.getRate() * currQyt;
+            double updatedAmt = mc.getDueAmount() - currAmt;
+            mc.setDueAmount(updatedAmt);
+            mc.setLastUpdated(LocalDateTime.now());
+            milkmanCustomerRepository.save(mc);
+            orderRepository.delete(order);
+        }catch (RuntimeException e){
+            throw new RuntimeException("Error while deleting my order", e);
+        }
+
     }
 
     private MyOrdersResDTO toMyOrderDto(MilkOrder order) {

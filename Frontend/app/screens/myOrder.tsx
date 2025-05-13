@@ -18,7 +18,7 @@ interface DrawerLayoutRef {
 
 export default function MyOrderScreen() {
   const { id } = useLocalSearchParams();
-  const { userId, setUserId, myOrders, handleOrderConfirmation, handleOrderCancellation } = useCustomerOrderManagement();
+  const { userId, setUserId, myOrders, handleOrderCancellation } = useCustomerOrderManagement();
   const { handleLogout } = useUserManagement();
 
   // Tab state
@@ -130,8 +130,18 @@ export default function MyOrderScreen() {
   };
 
   const handleEditOrder = () => {
-    // Implement edit order logic here
-    console.log('Edit order:', selectedItem);
+    if (selectedItem) {
+      router.push({
+        pathname: '/screens/editOrder',
+        params: {
+          orderId: selectedItem.orderId,
+          quantity: selectedItem.quantity.toString(),
+          note: selectedItem.note || '',
+          orderDate: selectedItem.orderDate,
+          userId: userId
+        }
+      });
+    }
     setModalVisible(false);
   };
 
@@ -139,6 +149,9 @@ export default function MyOrderScreen() {
     // Implement delete order logic here
     console.log('Delete order:', selectedItem);
     setModalVisible(false);
+    if (selectedItem) {
+      handleOrderCancellation(selectedItem.orderId);
+    }
   };
 
   const navigationView = () => (
@@ -449,20 +462,28 @@ export default function MyOrderScreen() {
                   )}
                 </View>
                 <View style={styles.cardActions}>
-                  <Button 
-                    mode="contained" 
-                    onPress={handleEditOrder} 
-                    style={[styles.button, styles.editButton]}
-                  >
-                    Edit Order
-                  </Button>
-                  <Button 
-                    mode="outlined" 
-                    onPress={handleDeleteOrder} 
-                    style={[styles.button, styles.deleteButton]}
-                  >
-                    Delete Order
-                  </Button>
+                  {selectedItem?.status === 'PENDING' ? (
+                    <>
+                      <Button 
+                        mode="contained" 
+                        onPress={handleEditOrder} 
+                        style={[styles.button, styles.editButton]}
+                      >
+                        Edit Order
+                      </Button>
+                      <Button 
+                        mode="outlined" 
+                        onPress={handleDeleteOrder} 
+                        style={[styles.button, styles.deleteButton]}
+                      >
+                        Delete Order
+                      </Button>
+                    </>
+                  ) : (
+                    <Text style={styles.disabledActionText}>
+                      Orders can only be edited or deleted when they are in PENDING status
+                    </Text>
+                  )}
                 </View>
               </View>
             </Modal>
@@ -739,5 +760,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     marginHorizontal: -8,
     marginBottom: -8,
+  },
+  disabledActionText: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: 14,
+    fontStyle: 'italic',
+    padding: 8,
   },
 });

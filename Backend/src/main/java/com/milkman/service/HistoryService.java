@@ -1,13 +1,17 @@
 package com.milkman.service;
 
+import com.milkman.DAO.HistoryServiceDAO;
 import com.milkman.DTO.GetHistoryDTO;
+import com.milkman.DTO.MilkmanHistoryResponseDTO;
 import com.milkman.model.MilkmanCustomer;
 import com.milkman.repository.MilkmanCustomerRepository;
+import com.milkman.repository.OrderHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class HistoryService {
@@ -15,13 +19,17 @@ public class HistoryService {
     @Autowired
     MilkmanCustomerRepository milkmanCustomerRepository;
 
-//    private List<HistoryResponseDTO> getHistory(GetHistoryDTO request){
-//        Optional<MilkmanCustomer> associationOpt = milkmanCustomerRepository.findByMilkman_IdAndCustomer_Id(request.getMilkmanId(), request.getCustomerId());
-//        if (associationOpt.isEmpty()) {
-//            throw new RuntimeException("Milkman-customer association not found");
-//        }
-//
-//
-//    }
+    @Autowired
+    OrderHistoryRepository orderHistoryRepository;
+
+    @Autowired
+    HistoryServiceDAO historyServiceDAO;
+
+    public List<MilkmanHistoryResponseDTO> getHistory(GetHistoryDTO request){
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+        LocalDate from = LocalDate.parse(request.getFromDate(), formatter);
+        LocalDate to = LocalDate.parse(request.getToDate(), formatter);
+        return historyServiceDAO.getHistoryForGivenMilkmanAndCustomer(request.getMilkmanId(), request.getCustomerId(), from ,to);
+    }
 
 }
