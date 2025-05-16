@@ -105,7 +105,7 @@ export default function CustomerHomeScreen() {
           <Drawer.Item
             label="Settings"
             icon="cog"
-            onPress={() => {}}
+            onPress={() => router.push(`/screens/customerSettings?id=${userId}`)}
             style={styles.drawerItem}
             theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
           />
@@ -146,9 +146,11 @@ export default function CustomerHomeScreen() {
               ]}
             >
               <Surface style={styles.statCard}>
-                <MaterialCommunityIcons name="account-group" size={24} color="#1976D2" />
-                <Text style={styles.statNumber}>{milkmans.length}</Text>
-                <Text style={styles.statLabel}>Total Milkmans</Text>
+                <View style={{ overflow: 'hidden', alignItems: 'center' }}>
+                  <MaterialCommunityIcons name="account-group" size={24} color="#1976D2" style={{ marginBottom: 8 }} />
+                  <Text style={styles.statNumber}>{milkmans.length}</Text>
+                  <Text style={styles.statLabel}>Total Milkmans</Text>
+                </View>
               </Surface>
             </Animated.View>
 
@@ -407,22 +409,26 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
+    justifyContent: 'center',
     elevation: 2,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderWidth: 1,
     borderColor: '#E3F2FD',
+    minHeight: 120,
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 8,
     color: '#1976D2',
+    textAlign: 'center',
+    marginTop: 4,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#1976D2',
     marginTop: 4,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   searchContainer: {
     padding: 16,

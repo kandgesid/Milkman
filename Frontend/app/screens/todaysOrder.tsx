@@ -231,7 +231,7 @@ export default function TodaysOrderScreen() {
                 ) : (
                   sortedOrders.slice(from, to).map((item, index) => (
                     <DataTable.Row 
-                      key={item.milkmanCustomerId?.toString()} 
+                      key={item.orderId?.toString()} 
                       onPress={() => onRowPress(item)}
                       style={[
                         styles.tableRow,

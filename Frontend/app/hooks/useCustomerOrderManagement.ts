@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import instacnce from '../auth/axiosConfig';
 import { MyOrder, newOrder, editMyOrder } from '../types';
 import { router } from 'expo-router';
-const API_URL = 'http://172.31.20.122:8080';
+const API_URL = 'http://10.0.0.158:8080';
 
 const useCustomerOrderManagement = () => {
   const [myOrders, setMyOrders] = useState<MyOrder[]>([]);

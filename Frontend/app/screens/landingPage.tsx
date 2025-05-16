@@ -116,88 +116,90 @@ export default function LandingPage() {
             ]}
           >
             <Surface style={styles.form} elevation={4}>
-              <Text variant="headlineSmall" style={styles.loginTitle}>
-                Login
-              </Text>
-              <Animated.View 
-                style={[
-                  styles.inputContainer,
-                  {
-                    transform: [
-                      {
-                        scale: phoneInputAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 1.02],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="phone"
-                  size={24}
-                  color="#1976D2"
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  placeholder="Phone Number"
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                  style={[styles.input, { color: '#000000' }]}
-                  mode="outlined"
-                  outlineColor="#1976D2"
-                  activeOutlineColor="#1976D2"
-                  onFocus={() => handleInputFocus(phoneInputAnim)}
-                  onBlur={() => handleInputBlur(phoneInputAnim)}
-                  textColor="#000000"
-                />
-              </Animated.View>
-              <Animated.View 
-                style={[
-                  styles.inputContainer,
-                  {
-                    transform: [
-                      {
-                        scale: passwordInputAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 1.02],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="lock"
-                  size={24}
-                  color="#1976D2"
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  placeholder="Password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  style={[styles.input, { color: '#000000' }]}
-                  mode="outlined"
-                  outlineColor="#1976D2"
-                  activeOutlineColor="#1976D2"
-                  onFocus={() => handleInputFocus(passwordInputAnim)}
-                  onBlur={() => handleInputBlur(passwordInputAnim)}
-                  textColor="#000000"
-                />
-              </Animated.View>
-              <Button
-                mode="contained"
-                onPress={handleSubmit}
-                style={styles.loginButton}
-                uppercase={false}
-                labelStyle={styles.buttonLabel}
-              >
-                Login
-              </Button>
+              <View style={{ overflow: 'hidden' }}>
+                <Text variant="headlineSmall" style={styles.loginTitle}>
+                  Login
+                </Text>
+                <Animated.View 
+                  style={[
+                    styles.inputContainer,
+                    {
+                      transform: [
+                        {
+                          scale: phoneInputAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 1.02],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="phone"
+                    size={24}
+                    color="#1976D2"
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    placeholder="Phone Number"
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                    style={[styles.input, { color: '#000000' }]}
+                    mode="outlined"
+                    outlineColor="#1976D2"
+                    activeOutlineColor="#1976D2"
+                    onFocus={() => handleInputFocus(phoneInputAnim)}
+                    onBlur={() => handleInputBlur(phoneInputAnim)}
+                    textColor="#000000"
+                  />
+                </Animated.View>
+                <Animated.View 
+                  style={[
+                    styles.inputContainer,
+                    {
+                      transform: [
+                        {
+                          scale: passwordInputAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 1.02],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="lock"
+                    size={24}
+                    color="#1976D2"
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    style={[styles.input, { color: '#000000' }]}
+                    mode="outlined"
+                    outlineColor="#1976D2"
+                    activeOutlineColor="#1976D2"
+                    onFocus={() => handleInputFocus(passwordInputAnim)}
+                    onBlur={() => handleInputBlur(passwordInputAnim)}
+                    textColor="#000000"
+                  />
+                </Animated.View>
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
+                  style={styles.loginButton}
+                  uppercase={false}
+                  labelStyle={styles.buttonLabel}
+                >
+                  Login
+                </Button>
+              </View>
             </Surface>
 
             <Animated.View style={styles.registerContainer}>

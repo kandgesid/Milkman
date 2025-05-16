@@ -22,7 +22,12 @@ public class HistoryServiceDAO {
         @Override
         public MilkmanHistoryResponseDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
             MilkmanHistoryResponseDTO o = new MilkmanHistoryResponseDTO();
-
+            o.setOrder_id(UUID.fromString(rs.getString("order_id")));
+            o.setQuantity(rs.getDouble("quantity"));
+            o.setDue_amount(rs.getDouble("due_amount"));
+            o.setMilk_rate(rs.getDouble("milk_rate"));
+            o.setDelivery_status(rs.getString("delivery_status"));
+            o.setDelivery_date(rs.getObject("delivery_date", LocalDate.class));
             return o;
         }
     };
@@ -34,7 +39,8 @@ public class HistoryServiceDAO {
                     mo.amount as due_amount,
                     mo.quantity as quantity,
                     mo.rate as milk_rate,
-                    oh.status as delivery_status
+                    oh.status as delivery_status,
+                    oh.delivery_date as delivery_date
                 from order_history oh
                     join milk_order mo
                     on oh.order_id = mo.id

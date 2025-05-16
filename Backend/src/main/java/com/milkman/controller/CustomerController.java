@@ -1,5 +1,6 @@
 package com.milkman.controller;
 
+import com.milkman.DTO.CustomerDTO;
 import com.milkman.DTO.MilkmanInfoDTO;
 import com.milkman.DTO.MyOrdersResDTO;
 import com.milkman.DTO.UpdateMyOrderReqDTO;
@@ -36,8 +37,9 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Customer> getCustomerById(@PathVariable UUID id){
-        Customer customer = customerService.getCustomerById(id);
+    ResponseEntity<CustomerDTO> getCustomerById(@PathVariable UUID id){
+        CustomerDTO customer = customerService.getCustomerById(id);
+
         return ResponseEntity.ok(customer);
     }
 
@@ -67,6 +69,16 @@ public class CustomerController {
         try {
             MilkOrder order = customerService.updateMyOrder(id, request);
             return ResponseEntity.ok(order.getId());
+        }catch (Exception ex){
+            return ResponseEntity.internalServerError().body(ex);
+        }
+    }
+
+    @PostMapping ("/updateCustomer/{id}")
+    ResponseEntity<?> updateCustomer(@PathVariable UUID id, @RequestBody CustomerDTO request){
+        try {
+            Customer customer = customerService.updateCustomer(id, request);
+            return ResponseEntity.ok(customer.getId());
         }catch (Exception ex){
             return ResponseEntity.internalServerError().body(ex);
         }

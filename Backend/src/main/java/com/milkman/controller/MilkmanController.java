@@ -1,8 +1,6 @@
 package com.milkman.controller;
 
-import com.milkman.DTO.AddNewCustomerDTO;
-import com.milkman.DTO.CustomerInfoDTO;
-import com.milkman.DTO.MilkOrderResponseDTO;
+import com.milkman.DTO.*;
 import com.milkman.model.Customer;
 import com.milkman.model.Milkman;
 import com.milkman.model.MilkmanCustomer;
@@ -37,10 +35,10 @@ public class MilkmanController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Milkman> getMilkmanById(@PathVariable UUID id) {
+    public ResponseEntity<MilkmanDTO> getMilkmanById(@PathVariable UUID id) {
         try{
-            Milkman milkman = milkmanService.getMilkmanById(id);
-            return new ResponseEntity<>(milkman, HttpStatus.OK);
+            MilkmanDTO milkman = milkmanService.getMilkmanInfoById(id);
+            return new ResponseEntity<MilkmanDTO>(milkman, HttpStatus.OK);
         }catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -89,9 +87,21 @@ public class MilkmanController {
         }
 
     }
+
+    @PostMapping("/updateOrderRate")
+    public ResponseEntity<?> addNewCustomer(@RequestBody UpdateMilkRateReqDTO request) {
+        System.out.println(request.getMilkmanId());
+        try {
+            milkmanService.updateMilkRate(request);
+            return ResponseEntity.ok(HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+        }
+
+    }
     
-    @PutMapping("/{id}")
-    public ResponseEntity<Milkman> updateMilkman(@PathVariable UUID id, @RequestBody Milkman userDetails) {
+    @PostMapping("updateMilkman/{id}")
+    public ResponseEntity<Milkman> updateMilkman(@PathVariable UUID id, @RequestBody MilkmanDTO userDetails) {
         try {
             Milkman updatedMilkman = milkmanService.updateMilkman(id, userDetails);
             return ResponseEntity.ok(updatedMilkman);

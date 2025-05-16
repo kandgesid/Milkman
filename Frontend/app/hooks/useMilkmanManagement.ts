@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 // import axios from 'axios';
 import instacnce from '../auth/axiosConfig';
-import { Milkman, newCustomer, User, Order, Customer } from '../types';
+import { Milkman, newCustomer, User, Order, Customer, MilkRateUpdate } from '../types';
 
-const API_URL = 'http://172.31.20.122:8080';
+const API_URL = 'http://10.0.0.158:8080';
 
 const useMilkManagement = () => {
   const [customers, setCutomers] = useState<Customer[]>([]);
@@ -138,6 +138,19 @@ const useMilkManagement = () => {
     }
   }, [fetchUsers]);
 
+  const handleMilkRateUpdate = async (data: MilkRateUpdate) => {
+    console.log("handleMilkRateUpdate : " + data);
+    try {
+      const response = await instacnce.post(`${API_URL}/api/milkman/updateOrderRate`, data);
+      if(response.status === 200){
+        Alert.alert('Success', 'Milk rate updated successfully');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update milk rate. Please check your connection and try again.');
+      console.log(error);
+    }
+  }
+
   return {
     customers,
     formData,
@@ -149,7 +162,8 @@ const useMilkManagement = () => {
     handleDelete,
     setUserId,
     setUserRole,
-    handleAddCustomer
+    handleAddCustomer,
+    handleMilkRateUpdate
   };
 };
 

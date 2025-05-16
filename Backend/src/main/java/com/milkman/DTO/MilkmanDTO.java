@@ -1,27 +1,13 @@
-package com.milkman.model;
-
-import jakarta.persistence.*;
-import lombok.Data;
-import org.hibernate.annotations.Cascade;
+package com.milkman.DTO;
 
 import java.util.UUID;
 
-@Entity
-@Data
-public class Milkman {
-
-    @Id
+public class MilkmanDTO {
     private UUID id;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "id") // This column is both PK and FK to User
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private User user;
-
     private String name;
-    private String email;
     private String phoneNumber;
+    private  String email;
     private String address;
 
     public UUID getId() {
@@ -32,28 +18,12 @@ public class Milkman {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPhoneNumber() {
@@ -64,11 +34,30 @@ public class Milkman {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getAddress() {
         return address;
     }
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "MilkmanDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", address='" + address + '\'' +
+                '}';
     }
 }

@@ -17,6 +17,12 @@ export interface UserLogin {
   role: string;
 }
 
+export interface MilkRateUpdate {
+  customerId: string;
+  milkmanId: string;
+  milkRate: number;
+}
+
 export interface Customer {
   id?: number;
   name: string;
@@ -62,11 +68,26 @@ export interface Milkman {
   dueAmount: number;
 }
 
+export interface MilkmanHistory {
+  order_id: string;
+  delivery_date: string;
+  delivery_status: string;
+  due_amount: number;
+  quantity: number;
+  milk_rate: number;
+}
 export interface newOrder {
   customerId: string;
   milkmanId: string;
   requestedQuantity: number;
   orderDate: Date;
+}
+
+export interface getHistoryData {
+  customerId: string;
+  milkmanId: string;
+  toDate: Date;
+  fromDate: Date;
 }
 
 export interface newCustomer {

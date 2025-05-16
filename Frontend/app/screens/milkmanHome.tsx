@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Animated, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
-import { Appbar, Text, Drawer, FAB, Searchbar, Surface, useTheme, DataTable, Portal, Modal, Provider as PaperProvider } from 'react-native-paper';
+import { Appbar, Text, Drawer, FAB, Searchbar, Surface, useTheme, DataTable, Portal, Modal, Provider as PaperProvider, Button, TextInput } from 'react-native-paper';
 import { useLocalSearchParams, router } from 'expo-router';
 import UserForm from '../components/UserForm';
 import useMilkManagement from '../hooks/useMilkmanManagement';
@@ -21,7 +21,9 @@ const ITEMS_PER_PAGE = 5;
 export default function MilkManHomeScreen() {
   const { id } = useLocalSearchParams();
   const [showAddUser, setShowAddUser] = useState(false);
-  const { userId, setUserId, customers, handleAddCustomer } = useMilkManagement();
+  const [showEditRate, setShowEditRate] = useState(false);
+  const [newRate, setNewRate] = useState('');
+  const { userId, setUserId, customers, handleAddCustomer, handleMilkRateUpdate } = useMilkManagement();
   const { handleLogout } = useUserManagement();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
@@ -69,6 +71,19 @@ export default function MilkManHomeScreen() {
     router.push('/screens/landingPage');
   };
 
+  const handleEditRate = () => {
+    if (!selectedCustomer || !newRate) return;
+    
+    handleMilkRateUpdate({
+      customerId: selectedCustomer.id?.toString() || '',
+      milkmanId: userId as string,
+      milkRate: parseFloat(newRate)
+    });
+    router.push(`/screens/milkmanHome?id=${userId}`);
+    setShowEditRate(false);
+    setNewRate('');
+  };
+
   const filteredCustomers = customers.filter(customer => 
     customer.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     customer.phoneNumber?.includes(searchQuery) ||
@@ -109,7 +124,7 @@ export default function MilkManHomeScreen() {
           <Drawer.Item
             label="Settings"
             icon="cog"
-            onPress={() => {}}
+            onPress={() => router.push(`/screens/milkmanSettings?id=${userId}`)}
             style={styles.drawerItem}
             theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
           />
@@ -158,17 +173,21 @@ export default function MilkManHomeScreen() {
               ]}
             >
               <Surface style={styles.statCard}>
-                <MaterialCommunityIcons name="account-group" size={24} color="#1976D2" />
-                <Text style={styles.statNumber}>{customers.length}</Text>
-                <Text style={styles.statLabel}>Total Customers</Text>
+                <View style={{ overflow: 'hidden' }}>
+                  <MaterialCommunityIcons name="account-group" size={24} color="#1976D2" />
+                  <Text style={styles.statNumber}>{customers.length}</Text>
+                  <Text style={styles.statLabel}>Total Customers</Text>
+                </View>
               </Surface>
               <Surface 
                 style={[styles.statCard, styles.addCard]} 
                 onTouchEnd={() => setShowAddUser(true)}
               >
-                <MaterialCommunityIcons name="account-plus" size={24} color="#1976D2" />
-                <Text style={styles.statNumber}>+</Text>
-                <Text style={styles.statLabel}>Add Customer</Text>
+                <View style={{ overflow: 'hidden' }}>
+                  <MaterialCommunityIcons name="account-plus" size={24} color="#1976D2" />
+                  <Text style={styles.statNumber}>+</Text>
+                  <Text style={styles.statLabel}>Add Customer</Text>
+                </View>
               </Surface>
             </Animated.View>
 
@@ -355,8 +374,84 @@ export default function MilkManHomeScreen() {
                       </View>
                     </View>
                   </ScrollView>
+                  <View style={styles.modalButtonsContainer}>
+                    <Button
+                      mode="outlined"
+                      onPress={() => {
+                        setShowCustomerDetails(false);
+                        setNewRate(selectedCustomer.milkRate?.toString() || '');
+                        setShowEditRate(true);
+                      }}
+                      style={[styles.modalButton, styles.editButton]}
+                      icon="pencil"
+                    >
+                      Edit Rate
+                    </Button>
+                    <Button
+                      mode="contained"
+                      onPress={() => {
+                        setShowCustomerDetails(false);
+                        router.push(`/screens/customerHistory?customerId=${selectedCustomer.id}&milkmanId=${userId}&customerName=${encodeURIComponent(selectedCustomer.name || '')}&customerPhone=${selectedCustomer.phoneNumber || ''}&customerAddress=${encodeURIComponent(selectedCustomer.address || '')}&customerRate=${selectedCustomer.milkRate || ''}`);
+                      }}
+                      style={[styles.modalButton, styles.historyButton]}
+                      icon="history"
+                    >
+                      View History
+                    </Button>
+                  </View>
                 </View>
               )}
+            </Modal>
+
+            <Modal
+              visible={showEditRate}
+              onDismiss={() => setShowEditRate(false)}
+              contentContainerStyle={styles.editRateModal}
+            >
+              <View style={styles.editRateContainer}>
+                <View style={styles.editRateHeader}>
+                  <View style={styles.titleContainer}>
+                    <Text style={styles.editRateTitle}>Update Rate</Text>
+                  </View>
+                  <TouchableOpacity 
+                    onPress={() => setShowEditRate(false)}
+                    style={styles.closeButton}
+                  >
+                    <MaterialCommunityIcons name="close" size={24} color="#1976D2" />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.editRateContent}>
+                  <Text style={styles.editRateLabel}>New Rate (per liter)</Text>
+                  <TextInput
+                    mode="outlined"
+                    value={newRate}
+                    onChangeText={setNewRate}
+                    keyboardType="numeric"
+                    style={styles.rateInput}
+                    placeholder="Enter new rate"
+                    right={<TextInput.Affix text="₹" />}
+                  />
+                </View>
+
+                <View style={styles.editRateButtons}>
+                  <Button
+                    mode="outlined"
+                    onPress={() => setShowEditRate(false)}
+                    style={[styles.editRateButton, styles.cancelButton]}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={handleEditRate}
+                    style={[styles.editRateButton, styles.updateButton]}
+                    disabled={!newRate}
+                  >
+                    Update Rate
+                  </Button>
+                </View>
+              </View>
             </Modal>
           </Portal>
         </View>
@@ -645,5 +740,93 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E3F2FD',
+    backgroundColor: '#FFFFFF',
+  },
+  modalButton: {
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  editButton: {
+    backgroundColor: '#1976D2',
+    color: '#000000',
+  },
+  historyButton: {
+    backgroundColor: '#1976D2',
+  },
+  editRateModal: {
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    margin: 16,
+    borderRadius: 16,
+    width: Dimensions.get('window').width - 32,
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  editRateContainer: {
+    width: '100%',
+  },
+  editRateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3F2FD',
+    backgroundColor: '#FFFFFF',
+  },
+  editRateTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1976D2',
+  },
+  editRateContent: {
+    padding: 16,
+    color: '#000000',
+  },
+  editRateLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  rateInput: {
+    backgroundColor: 'white',
+    fontSize: 15,
+  },
+  editRateButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E3F2FD',
+    backgroundColor: '#FFFFFF',
+    color: '#000000',
+  },
+  editRateButton: {
+    flex: 1,
+    marginHorizontal: 6,
+    color: '#000000',
+  },
+  updateButton: {
+    backgroundColor: '#1976D2',
+    color: '#000000',
+  },
+  cancelButton: {
+    backgroundColor: '#1976D2',
+    color: '#000000',
   },
 });

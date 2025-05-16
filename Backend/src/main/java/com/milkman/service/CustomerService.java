@@ -1,9 +1,6 @@
 package com.milkman.service;
 
-import com.milkman.DTO.CustomerInfoDTO;
-import com.milkman.DTO.MilkmanInfoDTO;
-import com.milkman.DTO.MyOrdersResDTO;
-import com.milkman.DTO.UpdateMyOrderReqDTO;
+import com.milkman.DTO.*;
 import com.milkman.model.Customer;
 import com.milkman.model.MilkOrder;
 import com.milkman.model.MilkmanCustomer;
@@ -34,9 +31,22 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
-    public Customer getCustomerById(final UUID customerId){
-        return customerRepository.findById(customerId)
+    public CustomerDTO getCustomerById(final UUID customerId){
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
+        return toCustomerDto(customer);
+    }
+
+    private CustomerDTO toCustomerDto(Customer customer) {
+        CustomerDTO dto = new CustomerDTO();
+        dto.setId(customer.getId());
+        dto.setName(customer.getName());
+        dto.setEmail(customer.getEmail());
+        dto.setPhoneNumber(customer.getPhoneNumber());
+        dto.setAddress(customer.getAddress());
+        dto.setFamilySize(customer.getFamilySize());
+        dto.setDefaultMilkQty(customer.getDefaultMilkQty());
+        return dto;
     }
 
     public List<Customer> getCustomerByPhoneNumber(final String phone){
@@ -80,6 +90,21 @@ public class CustomerService {
             return orderRepository.save(order);
         }catch (RuntimeException e){
             throw new RuntimeException("Error while updating my order", e);
+        }
+
+    }
+
+    public Customer updateCustomer(UUID customerId, CustomerDTO request){
+        try{
+            Customer customer =  customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+            customer.setName(request.getName());
+            customer.setEmail(request.getEmail());
+            customer.setAddress(request.getAddress());
+            customer.setFamilySize(request.getFamilySize());
+            customer.setDefaultMilkQty(request.getDefaultMilkQty());
+            return customerRepository.save(customer);
+        }catch (RuntimeException e){
+            throw new RuntimeException("Error while updating customer", e);
         }
 
     }

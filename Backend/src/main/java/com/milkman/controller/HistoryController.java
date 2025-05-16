@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,9 +27,14 @@ public class HistoryController {
     HistoryService historyService;
 
     @GetMapping("/milkman/getHistory/")
-    ResponseEntity<?> getHistoryForMilkmanAndCutomer(@RequestBody GetHistoryDTO request) {
+    ResponseEntity<?> getHistoryForMilkmanAndCutomer(@RequestParam(name = "customerId") UUID customerId,
+                                                     @RequestParam(name = "milkmanId") UUID milkmanId,
+                                                     @RequestParam(name = "toDate") String toDate,
+                                                     @RequestParam(name = "fromDate") String fromDate) {
         try {
-            List<MilkmanHistoryResponseDTO> result= historyService.getHistory(request);
+            System.out.println("Request: " + customerId + " ," + milkmanId + " ," + toDate + " ," + fromDate);
+            List<MilkmanHistoryResponseDTO> result= historyService.getHistory(customerId, milkmanId, toDate, fromDate);
+            System.out.println(result.size());
             return ResponseEntity.ok(result);
         }catch (Exception ex){
             System.out.println(ex.getMessage());
