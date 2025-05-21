@@ -28,12 +28,10 @@ public class CustomerController {
 
     @GetMapping("/")
     ResponseEntity<?> getAllCustomer(){
-        try{
+
             List<Customer> customers = customerService.getAllCustomers();
             return ResponseEntity.ok(customers);
-        }catch (Exception ex){
-            return ResponseEntity.internalServerError().body(ex);
-        }
+
     }
 
     @GetMapping("/{id}")
@@ -45,23 +43,14 @@ public class CustomerController {
 
     @GetMapping("/myMilkmans/{id}")
     ResponseEntity<?> getAllMilkmanForCustomer(@PathVariable UUID id){
-        try{
-            List<MilkmanInfoDTO> res = milkmanService.getAllMilkmanForCustomer(id);
-            return ResponseEntity.ok(res);
-        }catch (Exception ex){
-            return ResponseEntity.internalServerError().body(ex);
-        } 
+        List<MilkmanInfoDTO> res = milkmanService.getAllMilkmanForCustomer(id);
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/{id}/myOrders/")
     ResponseEntity<?> getMyOrders(@PathVariable UUID id){
-        try {
-            List<MyOrdersResDTO> myOrders = customerService.getAllMyOrders(id);
-            System.out.println( "MyOrders: " + myOrders.size());
-            return ResponseEntity.ok(myOrders);
-        }catch (Exception ex){
-            return ResponseEntity.internalServerError().body(ex);
-        }
+        List<MyOrdersResDTO> myOrders = customerService.getAllMyOrders(id);
+        return ResponseEntity.ok(myOrders);
     }
 
     @PostMapping ("/updateMyOrder/{id}")

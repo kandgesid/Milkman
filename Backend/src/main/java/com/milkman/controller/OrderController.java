@@ -25,38 +25,28 @@ public class OrderController {
     @PostMapping("/")
     public ResponseEntity<?> saveMilkOrder(@RequestBody MilkOrderRequestDTO milkOrder){
         // TODO : verify request body
-        try {
-            UUID orderId = orderService.placeMilkOrder(milkOrder);
-            return ResponseEntity.status(HttpStatus.OK).body(orderId);
-        }catch (Exception ex){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);
-        }
+        UUID orderId = orderService.placeMilkOrder(milkOrder);
+        return ResponseEntity.ok(orderId);
     }
 
     @PostMapping("/milkman-customer/{id}/deliveries")
     public ResponseEntity<?> confirmDelivery(@PathVariable("id") UUID id, @RequestBody ConfirmDeliveryRequestDTO deliveryDetails){
-        try{
-            System.out.println("Confirm delivery: " + id);
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-            LocalDate localDate = LocalDate.parse(deliveryDetails.getOrderDate(), formatter);
-            orderService.confirmOrderDelivery(id, localDate, deliveryDetails.getRemark());
-            return ResponseEntity.status(HttpStatus.OK).body("Delivery confirmed and recorded");
-        }catch(Exception ex){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);
-        }
+        System.out.println("Confirm delivery: " + id);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+        LocalDate localDate = LocalDate.parse(deliveryDetails.getOrderDate(), formatter);
+        orderService.confirmOrderDelivery(id, localDate, deliveryDetails.getRemark());
+        return ResponseEntity.status(HttpStatus.OK).body("Delivery confirmed and recorded");
+
     }
 
     @PostMapping("/milkman-customer/{id}/cancelOrder")
     public ResponseEntity<?> cancelDelivery(@PathVariable("id") UUID id, @RequestBody CancleDeliveryRequestDTO deliveryDetails){
-        try{
-            System.out.println("Cancel delivery: " + id);
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-            LocalDate localDate = LocalDate.parse(deliveryDetails.getOrderDate(), formatter);
-            orderService.cancelOrderDelivery(id, localDate, deliveryDetails.getRemark());
-            return ResponseEntity.status(HttpStatus.OK).body("Delivery canceled and recorded");
-        }catch(Exception ex){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);
-        }
+        System.out.println("Cancel delivery: " + id);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+        LocalDate localDate = LocalDate.parse(deliveryDetails.getOrderDate(), formatter);
+        orderService.cancelOrderDelivery(id, localDate, deliveryDetails.getRemark());
+        return ResponseEntity.status(HttpStatus.OK).body("Delivery canceled and recorded");
+
     }
 
 

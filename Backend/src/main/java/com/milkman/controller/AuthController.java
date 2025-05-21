@@ -3,8 +3,6 @@ package com.milkman.controller;
 import com.milkman.DTO.JwtResponse;
 import com.milkman.DTO.LoginRequest;
 import com.milkman.DTO.SignUpRequest;
-import com.milkman.model.Customer;
-import com.milkman.model.Milkman;
 import com.milkman.model.User;
 import com.milkman.repository.CustomerRepository;
 import com.milkman.repository.MilkmanRepository;
@@ -12,6 +10,7 @@ import com.milkman.repository.UserRepository;
 import com.milkman.security.JwtProvider;
 import com.milkman.security.UserDetailsImpl;
 import com.milkman.types.Role;
+import com.milkman.factory.UserProfileFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +32,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserProfileFactory userProfileFactory;
 
     @Autowired
     private MilkmanRepository milkmanRepository;
@@ -57,34 +59,11 @@ public class AuthController {
         User user = new User();
         user.setUsername(signUpRequest.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+        user.addRole(Role.fromString(signUpRequest.getRole()));
+        userRepository.save(user);
 
-        if (Role.MILKMAN.toString().equalsIgnoreCase(signUpRequest.getRole())) {
-            user.addRole(Role.MILKMAN);
-            // Save user first to generate its UUID
-            userRepository.save(user);
+        userProfileFactory.createUserProfile(signUpRequest, user);
 
-            Milkman milkman = new Milkman();
-            milkman.setUser(user);  // Establish the shared primary key association.
-            milkman.setName(signUpRequest.getName());
-            milkman.setEmail(signUpRequest.getEmail());
-            milkman.setAddress(signUpRequest.getAddress());
-            milkman.setPhoneNumber(signUpRequest.getPhoneNumber());
-            milkmanRepository.save(milkman);
-        } else {
-            user.addRole(Role.CUSTOMER);
-            // Save user first to generate its UUID
-            userRepository.save(user);
-
-            Customer customer = new Customer();
-            customer.setUser(user);  // Establish the shared primary key association.
-            customer.setName(signUpRequest.getName());
-            customer.setEmail(signUpRequest.getEmail());
-            customer.setAddress(signUpRequest.getAddress());
-            customer.setPhoneNumber(signUpRequest.getPhoneNumber());
-            customer.setFamilySize(signUpRequest.getNoOfFamilyMembers());
-            customer.setDefaultMilkQty(signUpRequest.getDailyMilkRequired());
-            customerRepository.save(customer);
-        }
         return ResponseEntity.ok("User registered successfully");
     }
 

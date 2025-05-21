@@ -1,13 +1,21 @@
 package com.milkman.service;
 
+
 import com.milkman.DTO.*;
+import com.milkman.DTO.CustomerInfoDTO;
+import com.milkman.DTO.MyOrdersResDTO;
+import com.milkman.exception.CustomerNotFoundException;
+import com.milkman.exception.DetailedExceptionBuilder;
+
 import com.milkman.model.Customer;
 import com.milkman.model.MilkOrder;
 import com.milkman.model.MilkmanCustomer;
 import com.milkman.repository.CustomerRepository;
 import com.milkman.repository.MilkmanCustomerRepository;
 import com.milkman.repository.OrderRepository;
+import com.milkman.types.ErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,9 +39,10 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
+
     public CustomerDTO getCustomerById(final UUID customerId){
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(customerId));
         return toCustomerDto(customer);
     }
 
@@ -54,10 +63,18 @@ public class CustomerService {
     }
 
     public List<CustomerInfoDTO> getAllCustomersForMilkman(UUID milkmanId){
-        List<MilkmanCustomer> result = milkmanCustomerRepository.findByMilkman_Id(milkmanId);
-        return result.stream()
-                .map(this::toDto)
-                .toList();
+        try {
+            List<MilkmanCustomer> result = milkmanCustomerRepository.findByMilkman_Id(milkmanId);
+            return result.stream().map(this::toDto).toList();
+        } catch (Exception ex) {
+            throw new DetailedExceptionBuilder()
+                    .withMessage("Failed to fetch customers for milkman")
+                    .withErrorCode("CUST-MILKMAN-500")
+                    .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .withType(ErrorType.SYSTEM)
+                    .withDetails(ex.getMessage())
+                    .build();
+        }
     }
 
     public List<MyOrdersResDTO> getAllMyOrders(UUID customerId){
