@@ -10,7 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomPagination from '../components/CustomPagination';
-
+import { getCurrentDate, formatDateToLocalTimezone, parseDateFromAPI } from '../utils/dateUtils';
 interface DrawerLayoutRef {
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -65,23 +65,20 @@ export default function MyOrderScreen() {
 
   // Filter and sort orders
   const filteredAndSortedOrders = React.useMemo(() => {
-    // Get today's date at midnight UTC
-    const today = new Date();
-    const todayUTC = new Date(Date.UTC(
-      today.getUTCFullYear(),
-      today.getUTCMonth(),
-      today.getUTCDate(),
-      0, 0, 0, 0
-    ));
-
+    const today = getCurrentDate();
+    console.log('today', today);
     let filtered = myOrders.filter(order => {
-      // Parse the order date and create UTC date
-      const [year, month, day] = order.orderDate.split('-').map(Number);
-      const orderDateUTC = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+      
+      const orderDateLocal = parseDateFromAPI(order.orderDate) 
+      const todayDate = new Date(today);      
       
       const matchesTab = activeTab === 'current' 
-        ? orderDateUTC >= todayUTC 
-        : orderDateUTC < todayUTC;
+        ? orderDateLocal.getTime() >= todayDate.getTime()
+        : orderDateLocal.getTime() < todayDate.getTime();
+      
+      console.log('orderDateLocal', orderDateLocal);
+      console.log('todayDate', todayDate);
+      console.log('matchesTab', matchesTab);
       
       const matchesStatus = statusFilter ? order.status === statusFilter : true;
       return matchesTab && matchesStatus;
@@ -91,9 +88,19 @@ export default function MyOrderScreen() {
       if (sortColumn === 'orderDate') {
         const [yearA, monthA, dayA] = a.orderDate.split('-').map(Number);
         const [yearB, monthB, dayB] = b.orderDate.split('-').map(Number);
-        const dateA = new Date(Date.UTC(yearA, monthA - 1, dayA, 0, 0, 0, 0)).getTime();
-        const dateB = new Date(Date.UTC(yearB, monthB - 1, dayB, 0, 0, 0, 0)).getTime();
-        return sortDirection === 'ascending' ? dateA - dateB : dateB - dateA;
+        const orderDateLocalA = new Date(
+          yearA,
+          monthA,
+          dayA,
+          0, 0, 0, 0
+        );
+        const orderDateLocalB = new Date(
+          yearB,
+          monthB,
+          dayB,
+          0, 0, 0, 0
+        );
+        return sortDirection === 'ascending' ? orderDateLocalA.getTime() - orderDateLocalB.getTime() : orderDateLocalB.getTime() - orderDateLocalA.getTime();
       } else {
         return sortDirection === 'ascending'
           ? a.status.localeCompare(b.status)
@@ -104,13 +111,11 @@ export default function MyOrderScreen() {
 
   // Helper function to format date consistently
   const formatDate = (dateString: string) => {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    const date = parseDateFromAPI(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-      timeZone: 'UTC'
     });
   };
 

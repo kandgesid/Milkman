@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import instacnce from '../auth/axiosConfig';
+import { instance, API_URL } from '../auth/axiosConfig';
 import { MyOrder, newOrder, editMyOrder } from '../types';
 import { router } from 'expo-router';
-const API_URL = 'http://10.0.0.158:8080';
+import { formatDateForAPI } from '../utils/dateUtils';
 
 const useCustomerOrderManagement = () => {
   const [myOrders, setMyOrders] = useState<MyOrder[]>([]);
@@ -15,7 +15,7 @@ const useCustomerOrderManagement = () => {
     if (!userId) return;
     try {
       // console.log("fetchOrder : " + userId);
-      const response = await instacnce.get(`${API_URL}/api/customer/${userId}/myOrders/`);
+      const response = await instance.get(`${API_URL}/api/customer/${userId}/myOrders/`);
       console.log("Raw response data, MyOrders:", response.data);
       // Log each order's date
     //   response.data.forEach((order: any) => {
@@ -37,15 +37,14 @@ const useCustomerOrderManagement = () => {
   }, [userId, fetchOrders]);
 
   const handlePlaceOrder = async (data: newOrder) => {
-    
     try {
-      // Format the date to YYYY-MM-DD
+      // Format the date using the utility function
       const formattedData = {
         ...data,
-        orderDate: new Date(data.orderDate).toISOString().split('T')[0]
+        orderDate: formatDateForAPI(data.orderDate)
       };
-      // console.log("handlePlaceOrder date: " + formattedData); 
-      const response = await instacnce.post(`${API_URL}/api/order/`, formattedData);
+      
+      const response = await instance.post(`${API_URL}/api/order/`, formattedData);
       
       if(response.status === 200){
         Alert.alert('Success', 'Order placed successfully');
@@ -62,7 +61,7 @@ const useCustomerOrderManagement = () => {
     console.log("handleMyOrderEdit : " + id);
     console.log(data);
     try {
-      const response = await instacnce.post(`${API_URL}/api/customer/updateMyOrder/${id}`, data);
+      const response = await instance.post(`${API_URL}/api/customer/updateMyOrder/${id}`, data);
       if(response.status === 200){
         Alert.alert('Success', 'Order updated successfully');
       }
@@ -77,7 +76,7 @@ const useCustomerOrderManagement = () => {
 
     console.log("handleOrderCancellation : " + id);
     try {
-      const response = await instacnce.post(`${API_URL}/api/customer/cancelMyOrder/${id}`);
+      const response = await instance.post(`${API_URL}/api/customer/cancelMyOrder/${id}`);
       if(response.status === 200){
         Alert.alert('Success', 'Order cancelled successfully');
       }

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import instacnce from '../auth/axiosConfig';
-import {getHistoryData, MilkmanHistory } from '../types';
+import { instance, API_URL } from '../auth/axiosConfig';
+import { getHistoryData, MilkmanHistory } from '../types';
 import { router } from 'expo-router';
-const API_URL = 'http://10.0.0.158:8080';
+import { formatDateForAPI } from '../utils/dateUtils';
 
 const useMilkmanHistoryManagement = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -11,16 +11,16 @@ const useMilkmanHistoryManagement = () => {
 
   const handleGetHistory = async (data: getHistoryData): Promise<MilkmanHistory[]> => {
     try {
-      // Format the date to YYYY-MM-DD
+      // Format the dates using the utility function
       const formattedData = {
         ...data,
-        toDate: new Date(data.toDate).toISOString().split('T')[0],
-        fromDate: new Date(data.fromDate).toISOString().split('T')[0]
+        toDate: formatDateForAPI(data.toDate),
+        fromDate: formatDateForAPI(data.fromDate)
       };
-      const response = await instacnce.get(`${API_URL}/api/history/milkman/getHistory/`, {
+      
+      const response = await instance.get(`${API_URL}/api/history/milkman/getHistory/`, {
         params: formattedData
       });
-      console.log("Raw response data, History:", response.data);
       
       if(response.status === 200 && response.data) {
         Alert.alert('Success', 'History retrieved successfully');
@@ -33,7 +33,7 @@ const useMilkmanHistoryManagement = () => {
       console.log(error);
       return [];
     }
-  } 
+  }
 
   return {
     userId,

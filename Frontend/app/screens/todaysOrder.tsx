@@ -8,6 +8,7 @@ import useUserManagement from '../hooks/useUserManagement';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomPagination from '../components/CustomPagination';
+import { formatDateForDisplay, parseDateFromAPI } from '../utils/dateUtils';
 
 interface DrawerLayoutRef {
   openDrawer: () => void;
@@ -25,14 +26,8 @@ export default function TodaysOrderScreen() {
 
   // Helper function to format date consistently
   const formatDate = (dateString: string) => {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      timeZone: 'UTC'
-    });
+    const date = parseDateFromAPI(dateString);
+    return formatDateForDisplay(date);
   };
 
   // Animation value for the table container

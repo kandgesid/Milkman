@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useOrderManagement from '../hooks/useOrderManagement';
+import { formatDateForDisplay, formatDateToLocalTimezone, getMinimumSelectableDate } from '../utils/dateUtils';
 
 export default function PlaceOrderScreen() {
   const { milkmanId, customerId } = useLocalSearchParams();
@@ -17,21 +18,12 @@ export default function PlaceOrderScreen() {
   const { handlePlaceOrder } = useOrderManagement();  
   const calendarRef = useRef<View>(null);
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  };
-
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    // Always hide the date picker first to prevent state update issues
     setShowDatePicker(false);
-    
-    // Only update the date if a valid date was selected
-    if (event.type === 'set' && selectedDate) {
-      setDate(selectedDate);
+    if (selectedDate) {
+      // Create a new date object in local timezone
+      const localDate = formatDateToLocalTimezone(selectedDate);
+      setDate(localDate);
     }
   };
 
@@ -40,18 +32,10 @@ export default function PlaceOrderScreen() {
   };
 
   const placeOrder = () => {
-    // Format the date to ensure it's sent in the correct format
-    const formattedDate = new Date(Date.UTC(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      0, 0, 0, 0
-    ));
-
     const data = {
       milkmanId: milkmanId as string,
       customerId: customerId as string,
-      orderDate: formattedDate,
+      orderDate: date,
       requestedQuantity: parseFloat(milkAmount),
       note: note
     }
@@ -93,7 +77,7 @@ export default function PlaceOrderScreen() {
                     textColor="#000000"
                     labelStyle={styles.dateButtonLabel}
                   >
-                    {formatDate(date)}
+                    {date ? formatDateForDisplay(date) : 'Select Date'}
                   </Button>
                   <Modal
                     visible={showDatePicker}
@@ -116,7 +100,7 @@ export default function PlaceOrderScreen() {
                               </Button>
                             </View>
                             <DateTimePicker
-                              value={date}
+                              value={date || new Date()}
                               mode="date"
                               display={Platform.OS === 'ios' ? 'inline' : 'default'}
                               onChange={handleDateChange}

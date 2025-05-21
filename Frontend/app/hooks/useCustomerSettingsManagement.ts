@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import instacnce from '../auth/axiosConfig';
+import { instance, API_URL } from '../auth/axiosConfig';
 import { Customer } from '../types';
 import useUserManagement from './useUserManagement';
-const API_URL = 'http://10.0.0.158:8080';
 
 const useCustomerSettingsManagement = () => {
   const [userDetails, setUserDetails] = useState<Customer>();
@@ -15,7 +14,7 @@ const useCustomerSettingsManagement = () => {
     if (!userId) return;
     try {
       console.log("fetchUserDetails : " + userId);
-      const response = await instacnce.get(`${API_URL}/api/customer/${userId}`);
+      const response = await instance.get(`${API_URL}/api/customer/${userId}`);
       console.log("Raw response data, UserDetails:", response.data);
       // Log each order's date
     //   response.data.forEach((order: any) => {
@@ -40,7 +39,7 @@ const useCustomerSettingsManagement = () => {
     console.log("handleUserEdit : " + id);
     console.log(data);
     try {
-      const response = await instacnce.post(`${API_URL}/api/customer/updateCustomer/${id}`, data);
+      const response = await instance.post(`${API_URL}/api/customer/updateCustomer/${id}`, data);
       if(response.status === 200){
         Alert.alert('Success', 'Information updated successfully');
         fetchUserDetails();
@@ -55,7 +54,7 @@ const useCustomerSettingsManagement = () => {
 
     console.log("handleAccountCancellation : " + id);
     try {
-      const response = await instacnce.post(`${API_URL}/api/customer/deleteCustomer/${id}`);
+      const response = await instance.post(`${API_URL}/api/customer/deleteCustomer/${id}`);
       if(response.status === 200){
         Alert.alert('Success', 'Account deleted successfully');
         handleLogout();

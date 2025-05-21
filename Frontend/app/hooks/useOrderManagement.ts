@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import instacnce from '../auth/axiosConfig';
+import { instance, API_URL } from '../auth/axiosConfig';
 import { Order, cancleOrder, confirmOrder, newOrder } from '../types';
 import { router } from 'expo-router';
-const API_URL = 'http://10.0.0.158:8080';
+import { formatDateForAPI } from '../utils/dateUtils';
 
 const useOrderManagement = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -15,7 +15,7 @@ const useOrderManagement = () => {
     if (!userId) return;
     try {
       // console.log("fetchOrder : " + userId);
-      const response = await instacnce.get(`${API_URL}/api/milkman/${userId}/orders/today`);
+      const response = await instance.get(`${API_URL}/api/milkman/${userId}/orders/today`);
       console.log("Today's Orders response data:", response.data);
       // Log each order's date
       response.data.forEach((order: any) => {
@@ -37,15 +37,14 @@ const useOrderManagement = () => {
   }, [userId, fetchOrders]);
 
   const handlePlaceOrder = async (data: newOrder) => {
-    
     try {
-      // Format the date to YYYY-MM-DD
+      // Format the date using the utility function
       const formattedData = {
         ...data,
-        orderDate: new Date(data.orderDate).toISOString().split('T')[0]
+        orderDate: formatDateForAPI(data.orderDate)
       };
-      // console.log("handlePlaceOrder date: " + formattedData); 
-      const response = await instacnce.post(`${API_URL}/api/order/`, formattedData);
+      
+      const response = await instance.post(`${API_URL}/api/order/`, formattedData);
       
       if(response.status === 200){
         Alert.alert('Success', 'Order placed successfully');
@@ -62,7 +61,7 @@ const useOrderManagement = () => {
     console.log("handleOrderConfirmation : " + id);
     console.log(data);
     try {
-      const response = await instacnce.post(`${API_URL}/api/order/milkman-customer/${id}/deliveries`, data);
+      const response = await instance.post(`${API_URL}/api/order/milkman-customer/${id}/deliveries`, data);
       if(response.status === 200){
         Alert.alert('Success', 'Order confirmed successfully');
         fetchOrders();
@@ -79,7 +78,7 @@ const useOrderManagement = () => {
     console.log("handleOrderCancellation : " + id);
     console.log(data);
     try {
-      const response = await instacnce.post(`${API_URL}/api/order/milkman-customer/${id}/cancelOrder`, data);
+      const response = await instance.post(`${API_URL}/api/order/milkman-customer/${id}/cancelOrder`, data);
       if(response.status === 200){
         Alert.alert('Success', 'Order cancelled successfully');
         fetchOrders();

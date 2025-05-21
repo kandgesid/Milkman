@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 // import axios from 'axios';
-import instacnce from '../auth/axiosConfig';
+import { instance, API_URL } from '../auth/axiosConfig';
 import { Milkman, newCustomer, User, Order, Customer } from '../types';
-
-const API_URL = 'http://10.0.0.158:8080';
 
 const useCustomerManagement = () => {
   const [milkmans, setUsers] = useState<Milkman[]>([]);
@@ -34,7 +32,7 @@ const useCustomerManagement = () => {
     if (!customerId) return;
     try {
       // console.log("fetchUser : " + customerId);
-      const response = await instacnce.get(`${API_URL}/api/customer/myMilkmans/${customerId}`);
+      const response = await instance.get(`${API_URL}/api/customer/myMilkmans/${customerId}`);
       console.log(response.data);
       setUsers(response.data);
     } catch (error) {
@@ -83,7 +81,7 @@ const useCustomerManagement = () => {
         Alert.alert('Validation Error', 'Please fill in all required fields');
         return;
       }
-      const response = await instacnce.post(`${API_URL}/api/milkman/addNewCustomer`, submitData);
+      const response = await instance.post(`${API_URL}/api/milkman/addNewCustomer`, submitData);
       // console.log(response);
       Alert.alert('Success', 'User added successfully');
       resetNewCustomerForm();
@@ -105,10 +103,10 @@ const useCustomerManagement = () => {
       }
 
       if (editingId) {
-        await instacnce.put(`${API_URL}/api/milkman/${editingId}`, submitData);
+        await instance.put(`${API_URL}/api/milkman/${editingId}`, submitData);
         Alert.alert('Success', 'User updated successfully');
       } else {
-        await instacnce.post(`${API_URL}/api/milkman`, submitData);
+        await instance.post(`${API_URL}/api/milkman`, submitData);
         Alert.alert('Success', 'User added successfully');
       }
       
@@ -131,7 +129,7 @@ const useCustomerManagement = () => {
 
   const handleDelete = useCallback(async (id: number) => {
     try {
-      await instacnce.delete(`${API_URL}/api/customer/${id}`);
+      await instance.delete(`${API_URL}/api/customer/${id}`);
       Alert.alert('Success', 'User deleted successfully');
       fetchUsers();
     } catch (error) {

@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 // import axios from 'axios';
-import instacnce from '../auth/axiosConfig';
+import { instance, API_URL } from '../auth/axiosConfig';
 import { Milkman, newCustomer, User, Order, Customer, MilkRateUpdate } from '../types';
-
-const API_URL = 'http://10.0.0.158:8080';
 
 const useMilkManagement = () => {
   const [customers, setCutomers] = useState<Customer[]>([]);
@@ -32,7 +30,7 @@ const useMilkManagement = () => {
     if (!userId) return;
     try {
       // console.log("fetchUser : " + userId);
-      const response = await instacnce.get(`${API_URL}/api/milkman/myCustomers/${userId}`);
+      const response = await instance.get(`${API_URL}/api/milkman/myCustomers/${userId}`);
       // console.log(response.data);
       setCutomers(response.data);
       // for (let i = 0; i < response.data.length; i++) {
@@ -82,7 +80,7 @@ const useMilkManagement = () => {
         Alert.alert('Validation Error', 'Please fill in all required fields');
         return;
       }
-      const response = await instacnce.post(`${API_URL}/api/milkman/addNewCustomer`, submitData);
+      const response = await instance.post(`${API_URL}/api/milkman/addNewCustomer`, submitData);
       // console.log(response);
       Alert.alert('Success', 'User added successfully');
       resetNewCustomerForm();
@@ -104,10 +102,10 @@ const useMilkManagement = () => {
       }
 
       if (editingId) {
-        await instacnce.put(`${API_URL}/api/milkman/${editingId}`, submitData);
+        await instance.put(`${API_URL}/api/milkman/${editingId}`, submitData);
         Alert.alert('Success', 'User updated successfully');
       } else {
-        await instacnce.post(`${API_URL}/api/milkman`, submitData);
+        await instance.post(`${API_URL}/api/milkman`, submitData);
         Alert.alert('Success', 'User added successfully');
       }
       
@@ -130,7 +128,7 @@ const useMilkManagement = () => {
 
   const handleDelete = useCallback(async (id: number) => {
     try {
-      await instacnce.delete(`${API_URL}/api/milkman/${id}`);
+      await instance.delete(`${API_URL}/api/milkman/${id}`);
       Alert.alert('Success', 'User deleted successfully');
       fetchUsers();
     } catch (error) {
@@ -141,7 +139,7 @@ const useMilkManagement = () => {
   const handleMilkRateUpdate = async (data: MilkRateUpdate) => {
     console.log("handleMilkRateUpdate : " + data);
     try {
-      const response = await instacnce.post(`${API_URL}/api/milkman/updateOrderRate`, data);
+      const response = await instance.post(`${API_URL}/api/milkman/updateOrderRate`, data);
       if(response.status === 200){
         Alert.alert('Success', 'Milk rate updated successfully');
       }

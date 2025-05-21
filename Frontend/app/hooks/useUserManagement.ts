@@ -4,8 +4,7 @@ import axios from 'axios';
 import { UserLogin, User } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-
-const API_URL = 'http://10.0.0.158:8080';
+import { instance, API_URL } from '../auth/axiosConfig';
 
 
 const useUserManagement = () => {

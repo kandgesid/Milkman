@@ -29,7 +29,7 @@ public class HistoryService {
     public List<MilkmanHistoryResponseDTO> getHistory(UUID customerId, UUID milkmanId, String toDate, String fromDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
         LocalDate from = LocalDate.parse(fromDate, formatter);
-        LocalDate to = LocalDate.parse(toDate, formatter);
+        LocalDate to = LocalDate.parse(toDate, formatter).plusDays(1);
         return historyServiceDAO.getHistoryForGivenMilkmanAndCustomer(milkmanId, customerId, from ,to);
     }
 

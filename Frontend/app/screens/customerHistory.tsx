@@ -9,6 +9,7 @@ import useMilkmanHistoryManagement from '../hooks/useMilkmanHistoryManagement';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { formatDateForDisplay, formatDateToLocalTimezone, formatEndOfDayDateToLocalTimezone, getCurrentDate, getMinimumSelectableDate } from '../utils/dateUtils';
 
 const screenWidth = Dimensions.get('window').width;
 const baseFont = screenWidth < 350 ? 12 : 15;
@@ -16,7 +17,7 @@ const baseFont = screenWidth < 350 ? 12 : 15;
 export default function CustomerHistoryScreen() {
   const { milkmanId, customerId, customerName, customerPhone, customerAddress, customerRate } = useLocalSearchParams();
   const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
+  const [toDate, setToDate] = useState(formatEndOfDayDateToLocalTimezone(getCurrentDate()));
   const [showFromDatePicker, setShowFromDatePicker] = useState(false);
   const [showToDatePicker, setShowToDatePicker] = useState(false);
   const [historyData, setHistoryData] = useState<MilkmanHistory[]>([]);
@@ -120,25 +121,23 @@ export default function CustomerHistoryScreen() {
     return pageNumbers;
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  };
-
   const handleFromDateChange = (event: any, selectedDate?: Date) => {
     setShowFromDatePicker(false);
-    if (event.type === 'set' && selectedDate) {
-      setFromDate(selectedDate);
+    if (selectedDate) {
+      // Create a new date object in local timezone
+      
+      const localDate = formatDateToLocalTimezone(selectedDate);
+      setFromDate(localDate);
     }
   };
 
   const handleToDateChange = (event: any, selectedDate?: Date) => {
     setShowToDatePicker(false);
-    if (event.type === 'set' && selectedDate) {
-      setToDate(selectedDate);
+    if (selectedDate) {
+      // Create a new date object in local timezone
+      const localDate = formatEndOfDayDateToLocalTimezone(selectedDate);
+      console.log('localToDate', localDate);
+      setToDate(localDate);
     }
   };
 
@@ -152,8 +151,8 @@ export default function CustomerHistoryScreen() {
     const historyData: getHistoryData = {
       customerId: customerId as string,
       milkmanId: milkmanId as string,
-      fromDate: fromDate,
-      toDate: toDate
+      fromDate: formatDateToLocalTimezone(fromDate),
+      toDate: formatEndOfDayDateToLocalTimezone(toDate)
     };
     const result = await handleGetHistory(historyData);
     setHistoryData(result);
@@ -281,7 +280,7 @@ export default function CustomerHistoryScreen() {
             </div>
 
             <div class="statement-period">
-              <p>Period: ${formatDate(fromDate)} - ${formatDate(toDate)}</p>
+              <p>Period: ${fromDate} - ${toDate}</p>
             </div>
 
             <table>
@@ -370,7 +369,7 @@ export default function CustomerHistoryScreen() {
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
             <Text style={styles.headerTitle}>Delivery Statement</Text>
-            <Text style={styles.headerSubtitle}>Period: {formatDate(fromDate)} - {formatDate(toDate)}</Text>
+            <Text style={styles.headerSubtitle}>Period: {formatDateForDisplay(fromDate)} - {formatDateForDisplay(toDate)}</Text>
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.totalAmount}>Total Amount</Text>
@@ -460,7 +459,7 @@ export default function CustomerHistoryScreen() {
                       textColor="#000000"
                       labelStyle={styles.dateButtonLabel}
                     >
-                      {formatDate(fromDate)}
+                      {fromDate ? formatDateForDisplay(fromDate) : 'Select Date'}
                     </Button>
                   </View>
                   <View style={styles.datePickerColumn}>
@@ -473,7 +472,7 @@ export default function CustomerHistoryScreen() {
                       textColor="#000000"
                       labelStyle={styles.dateButtonLabel}
                     >
-                      {formatDate(toDate)}
+                      {toDate ? formatDateForDisplay(toDate) : 'Select Date'}
                     </Button>
                   </View>
                 </View>
@@ -636,10 +635,12 @@ export default function CustomerHistoryScreen() {
                         </Button>
                       </View>
                       <DateTimePicker
-                        value={fromDate}
+                        value={fromDate || new Date()}
                         mode="date"
                         display={Platform.OS === 'ios' ? 'inline' : 'default'}
                         onChange={handleFromDateChange}
+                        maximumDate={new Date()}
+                        minimumDate={new Date(2020, 0, 1)}
                         textColor="#000000"
                         accentColor="#1976D2"
                         style={styles.calendar}
@@ -672,10 +673,12 @@ export default function CustomerHistoryScreen() {
                         </Button>
                       </View>
                       <DateTimePicker
-                        value={toDate}
+                        value={toDate || new Date()}
                         mode="date"
                         display={Platform.OS === 'ios' ? 'inline' : 'default'}
                         onChange={handleToDateChange}
+                        maximumDate={new Date()}
+                        minimumDate={new Date(2020, 0, 1)}
                         textColor="#000000"
                         accentColor="#1976D2"
                         style={styles.calendar}

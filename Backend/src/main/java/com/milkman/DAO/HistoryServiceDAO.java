@@ -48,7 +48,7 @@ public class HistoryServiceDAO {
                     on mo.milkman_customer_id = mc.id
                 where mc.milkman_id = ?
                     and mc.customer_id = ?
-                    and delivery_date >= ? and delivery_date <= ?;
+                    and oh.delivery_date >= ? and oh.delivery_date < ?;
             """;
         return jdbc.query(sql, new Object[]{milkmanId, customerId, from, to}, historyMapper);
     }
