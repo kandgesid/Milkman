@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -47,6 +48,12 @@ public class OrderController {
         orderService.cancelOrderDelivery(id, localDate, deliveryDetails.getRemark());
         return ResponseEntity.status(HttpStatus.OK).body("Delivery canceled and recorded");
 
+    }
+
+    @GetMapping("/summary/milkman/{milkmanId}")
+    public ResponseEntity<Map<String, Object>> getOrderSummaryForMilkman(@PathVariable UUID milkmanId) {
+        Map<String, Object> summary = orderService.generateOrderSummaryForMilkman(milkmanId);
+        return ResponseEntity.ok(summary);
     }
 
 

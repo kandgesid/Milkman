@@ -18,6 +18,7 @@ import com.milkman.template.CancelOrderProcessor;
 import com.milkman.template.ConfirmOrderProcessor;
 import com.milkman.template.PlaceOrderProcessor;
 import com.milkman.types.ErrorType;
+import com.milkman.visitor.OrderSummaryVisitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -26,8 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -188,6 +188,24 @@ public class OrderService {
                     .withDetails(ex.getMessage())
                     .build();
         }
+    }
+
+    public Map<String, Object> generateOrderSummaryForMilkman(UUID milkmanId) {
+        List<MilkOrder> orders = orderRepository.findByMilkmanCustomer_Milkman_Id(milkmanId);
+
+        OrderSummaryVisitor visitor = new OrderSummaryVisitor();
+        Iterator<MilkOrder> iterator = orders.iterator();
+        while (iterator.hasNext()) {
+            MilkOrder order = iterator.next();
+            order.accept(visitor);
+        }
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalOrders", visitor.getTotalOrders());
+        summary.put("totalQuantity", visitor.getTotalQuantity());
+        summary.put("totalRevenue", visitor.getTotalRevenue());
+
+        return summary;
     }
 
     public List<OrderDTO> convertToOrderDTOs(List<MilkOrder> orders) {

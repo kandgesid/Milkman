@@ -1,5 +1,7 @@
 package com.milkman.model;
 
+import com.milkman.visitor.OrderVisitable;
+import com.milkman.visitor.OrderVisitor;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -9,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-public class MilkOrder {
+public class MilkOrder implements OrderVisitable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -117,5 +119,10 @@ public class MilkOrder {
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
+    }
+
+    @Override
+    public void accept(OrderVisitor visitor) {
+        visitor.visit(this);
     }
 }

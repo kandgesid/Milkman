@@ -3,7 +3,6 @@ package com.milkman.template;
 import com.milkman.model.MilkOrder;
 import com.milkman.observer.OrderEvent;
 import com.milkman.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
@@ -34,7 +33,6 @@ public class ConfirmOrderProcessor extends AbstractOrderProcessor{
 
     @Override
     protected void processCoreLogic() {
-
     }
 
     @Override

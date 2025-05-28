@@ -1,29 +1,29 @@
-package com.milkman.observer.observers;
+package com.milkman.Mediator;
 
 import com.milkman.factory.NotificationServiceFactory;
 import com.milkman.model.MilkOrder;
 import com.milkman.nullable.INotificationSender;
 import com.milkman.observer.OrderEvent;
-import com.milkman.service.NotificationSenderService;
-import org.springframework.stereotype.Component;
+import com.milkman.service.LoggerService;
 
 import java.time.LocalDateTime;
 
-@Component
-public class NotificationObserver implements OrderEventObserver{
+public class OrderEventMediator {
+
+    LoggerService logger = LoggerService.getInstance();
+
     private final INotificationSender notificationService;
 
-    public NotificationObserver() {
+    public OrderEventMediator() {
         this.notificationService = NotificationServiceFactory.getNotificationSender();
     }
-    //private final NotificationSenderService notificationService = NotificationSenderService.getInstance();
 
-    @Override
-    public void update(OrderEvent event) {
+    public void handle(OrderEvent event){
         MilkOrder order = event.getOrder();
 
         String customerMessage;
         String milkmanMessage;
+        String logMessage;
 
         switch (event.getEventType()) {
             case "PLACED":
@@ -40,6 +40,13 @@ public class NotificationObserver implements OrderEventObserver{
                         order.getQuantity(),
                         order.getOrderDate()
                 );
+
+                logMessage = String.format(
+                        "📦 New Order Placed - ID: %s | Customer: %s | Qty: %.2f | Date: %s",
+                        event.getOrder().getId(),
+                        event.getOrder().getMilkmanCustomer().getCustomer().getName(),
+                        event.getOrder().getQuantity(),
+                        event.getOrder().getOrderDate());
                 break;
 
             case "DELIVERED":
@@ -55,6 +62,12 @@ public class NotificationObserver implements OrderEventObserver{
                         order.getQuantity(),
                         LocalDateTime.now()
                 );
+
+                logMessage = String.format(
+                        "✅ Order Delivered - ID: %s | Customer: %s | Delivered on: %s",
+                        event.getOrder().getId(),
+                        event.getOrder().getMilkmanCustomer().getCustomer().getName(),
+                        LocalDateTime.now());
                 break;
 
             case "CANCELLED":
@@ -69,14 +82,22 @@ public class NotificationObserver implements OrderEventObserver{
                         order.getMilkmanCustomer().getCustomer().getName(),
                         order.getOrderDate()
                 );
+
+                logMessage = String.format(
+                        "❌ Order Cancelled - ID: %s | Customer: %s | Cancelled on: %s",
+                        event.getOrder().getId(),
+                        event.getOrder().getMilkmanCustomer().getCustomer().getName(),
+                        LocalDateTime.now());
                 break;
 
             default:
                 customerMessage = "🔔 Notification: An update occurred on your order.";
                 milkmanMessage = "🔔 Milkman Update: An unknown order event occurred.";
+                logMessage = "Unknown order event.";
         }
 
         notificationService.notifyCustomer(customerMessage);
         notificationService.notifyMilkman(milkmanMessage);
+        logger.logInfo(logMessage);
     }
 }

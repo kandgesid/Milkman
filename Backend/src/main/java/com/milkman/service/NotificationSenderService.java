@@ -1,6 +1,8 @@
 package com.milkman.service;
 
-public class NotificationSenderService {
+import com.milkman.nullable.INotificationSender;
+
+public class NotificationSenderService implements INotificationSender {
     private static NotificationSenderService instance;
 
     private NotificationSenderService(){
@@ -14,10 +16,12 @@ public class NotificationSenderService {
         return instance;
     }
 
+    @Override
     public void notifyCustomer(String message) {
         System.out.println("🔔 [SIMULATED] Notification to Customer: " + message);
     }
 
+    @Override
     public void notifyMilkman(String message) {
         System.out.println("📨 [SIMULATED] Notification to Milkman: " + message);
     }
