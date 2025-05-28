@@ -1,13 +1,10 @@
 package com.milkman.DAO;
 
+import com.milkman.Adapter.HistoryResponseAdapter;
 import com.milkman.DTO.MilkmanHistoryResponseDTO;
 import com.milkman.repository.JdbcRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -15,22 +12,13 @@ import java.util.UUID;
 @Repository
 public class HistoryServiceDAO {
 
-    @Autowired
-    JdbcRepository jdbc;
+    private final JdbcRepository jdbc;
+    private final HistoryResponseAdapter historyResponseAdapter;
 
-    private final RowMapper<MilkmanHistoryResponseDTO> historyMapper = new RowMapper<>() {
-        @Override
-        public MilkmanHistoryResponseDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-            MilkmanHistoryResponseDTO o = new MilkmanHistoryResponseDTO();
-            o.setOrder_id(UUID.fromString(rs.getString("order_id")));
-            o.setQuantity(rs.getDouble("quantity"));
-            o.setDue_amount(rs.getDouble("due_amount"));
-            o.setMilk_rate(rs.getDouble("milk_rate"));
-            o.setDelivery_status(rs.getString("delivery_status"));
-            o.setDelivery_date(rs.getObject("delivery_date", LocalDate.class));
-            return o;
-        }
-    };
+    public HistoryServiceDAO(JdbcRepository jdbc, HistoryResponseAdapter historyResponseAdapter) {
+        this.jdbc = jdbc;
+        this.historyResponseAdapter = historyResponseAdapter;
+    }
 
     public List<MilkmanHistoryResponseDTO> getHistoryForGivenMilkmanAndCustomer(UUID milkmanId, UUID customerId, LocalDate from, LocalDate to) {
         String sql = """
@@ -50,6 +38,6 @@ public class HistoryServiceDAO {
                     and mc.customer_id = ?
                     and oh.delivery_date >= ? and oh.delivery_date < ?;
             """;
-        return jdbc.query(sql, new Object[]{milkmanId, customerId, from, to}, historyMapper);
+        return jdbc.query(sql, new Object[]{milkmanId, customerId, from, to}, historyResponseAdapter);
     }
 }

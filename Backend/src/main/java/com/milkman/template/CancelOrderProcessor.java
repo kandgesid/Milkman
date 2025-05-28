@@ -3,8 +3,8 @@ package com.milkman.template;
 import com.milkman.model.MilkOrder;
 import com.milkman.model.MilkmanCustomer;
 import com.milkman.observer.OrderEvent;
+import com.milkman.service.LoggerService;
 import com.milkman.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,10 +13,12 @@ public class CancelOrderProcessor extends AbstractOrderProcessor{
     private final UUID orderId;
     private final String remark;
 
-    private OrderService service;
+    private final OrderService service;
 
     private MilkOrder order;
     private MilkmanCustomer mc;
+
+    LoggerService logger = LoggerService.getInstance();
 
     public CancelOrderProcessor(UUID orderId, String remark, OrderService service) {
         this.orderId = orderId;
@@ -37,9 +39,8 @@ public class CancelOrderProcessor extends AbstractOrderProcessor{
 
     @Override
     protected void processCoreLogic() {
-        service.getLogger().logInfo("Cancelling delivery for Order: " + order);
-        double orderAmount = order.getQuantity() * order.getRate();
-        double updatedDueAmount = mc.getDueAmount() - orderAmount;
+        logger.logInfo("Cancelling delivery for Order: " + order);
+        double updatedDueAmount = mc.getDueAmount() - order.getAmount();
         mc.setLastUpdated(LocalDateTime.now());
         mc.setDueAmount(updatedDueAmount);
     }

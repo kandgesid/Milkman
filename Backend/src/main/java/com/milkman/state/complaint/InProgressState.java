@@ -15,7 +15,6 @@ public class InProgressState implements ComplaintState{
 
         if(!chain.handle(context)){
             throw new DetailedExceptionBuilder()
-                    .withMessage("Unsupported complaint action")
                     .withStatusCode(HttpStatus.BAD_REQUEST)
                     .withErrorCode("COMPLAINT-ACTION-INVALID")
                     .withType(ErrorType.BUSINESS)

@@ -1,38 +1,24 @@
 package com.milkman.DAO;
 
+import com.milkman.Adapter.OrderResponseAdapter;
 import com.milkman.DTO.MilkOrderResponseDTO;
 import com.milkman.repository.JdbcRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public class OrderServiceDAO {
 
-    @Autowired
-    private JdbcRepository jdbc;
+    private final JdbcRepository jdbc;
+    private final OrderResponseAdapter orderMapperAdapter;
 
-    private final RowMapper<MilkOrderResponseDTO> orderMapper = new RowMapper<>() {
-        @Override
-        public MilkOrderResponseDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-            MilkOrderResponseDTO o = new MilkOrderResponseDTO();
-            o.setMilkmanCustomerId( UUID.fromString(rs.getString("milkman_customer_id")) );
-            o.setOrderDate( rs.getObject("order_date", LocalDate.class) );
-            o.setMilkQuantity( rs.getDouble("quantity") );
-            o.setNote( rs.getString("note") );
-            o.setStatus( rs.getString("status") );
-            o.setCustomerAddress(rs.getString("address"));
-            o.setCustomerName(rs.getString("customer_name"));
-            o.setOrderId(UUID.fromString(rs.getString("order_id")));
-            return o;
-        }
-    };
+    public OrderServiceDAO(JdbcRepository jdbc, OrderResponseAdapter orderMapperAdapter1) {
+
+        this.jdbc = jdbc;
+        this.orderMapperAdapter = orderMapperAdapter1;
+    }
 
     public List<MilkOrderResponseDTO> getTodaysOrdersByMilkman(UUID milkmanId) {
         String sql = """
@@ -54,6 +40,6 @@ public class OrderServiceDAO {
                       AND DATE(mo.order_date) = CURRENT_DATE
                     WHERE mc.milkman_id = ?
             """;
-        return jdbc.query(sql, new Object[]{milkmanId}, orderMapper);
+        return jdbc.query(sql, new Object[]{milkmanId}, orderMapperAdapter);
     }
 }

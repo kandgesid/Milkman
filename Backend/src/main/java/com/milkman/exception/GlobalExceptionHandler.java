@@ -30,7 +30,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(500)
                 .body(new DetailedExceptionBuilder()
-                        .withMessage("Database operation failed")
                         .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                         .withErrorCode("DB-500")
                         .withType(ErrorType.DATABASE)
@@ -45,7 +44,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(500)
                 .body(new DetailedExceptionBuilder()
-                        .withMessage("Unexpected error")
                         .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                         .withErrorCode("GEN-500")
                         .withType(ErrorType.SYSTEM)

@@ -1,12 +1,10 @@
 package com.milkman.service;
 
 import com.milkman.DAO.HistoryServiceDAO;
-import com.milkman.DTO.GetHistoryDTO;
 import com.milkman.DTO.HistoryRequestDTO;
 import com.milkman.DTO.MilkmanHistoryResponseDTO;
 import com.milkman.exception.ApiException;
 import com.milkman.exception.DetailedExceptionBuilder;
-import com.milkman.model.MilkmanCustomer;
 import com.milkman.repository.MilkmanCustomerRepository;
 import com.milkman.repository.OrderHistoryRepository;
 import com.milkman.strategy.CustomDateRangeReportStrategy;
@@ -46,7 +44,6 @@ public class HistoryService {
         try {
             if (request.getStrategy() == null || request.getStrategy().isBlank()) {
                 throw new DetailedExceptionBuilder()
-                        .withMessage("Strategy type is missing")
                         .withStatusCode(HttpStatus.BAD_REQUEST)
                         .withErrorCode("HISTORY-STRATEGY-MISSING")
                         .withType(ErrorType.BUSINESS)
@@ -70,7 +67,6 @@ public class HistoryService {
             throw ae;
         } catch (Exception ex) {
             throw new DetailedExceptionBuilder()
-                    .withMessage("Failed to generate history report")
                     .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                     .withErrorCode("HISTORY-REPORT-FAILURE")
                     .withType(ErrorType.SYSTEM)

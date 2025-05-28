@@ -10,13 +10,9 @@ public class DetailedExceptionBuilder {
     private String details;
     private ErrorType type;
 
-    public DetailedExceptionBuilder withMessage(String message) {
-        this.message = message;
-        return this;
-    }
-
     public DetailedExceptionBuilder withErrorCode(String errorCode) {
         this.errorCode = errorCode;
+        this.message = ErrorMessageFlyweight.get(errorCode);
         return this;
     }
 

@@ -1,11 +1,11 @@
 package com.milkman.service;
 
+import com.milkman.Billing.Decorator.CostCalculator;
 import com.milkman.DAO.OrderServiceDAO;
 import com.milkman.DTO.MilkOrderRequestDTO;
 import com.milkman.DTO.MilkOrderResponseDTO;
 import com.milkman.DTO.OrderDTO;
 import com.milkman.exception.DetailedExceptionBuilder;
-import com.milkman.exception.OrderNotFoundException;
 import com.milkman.model.MilkOrder;
 import com.milkman.model.MilkmanCustomer;
 import com.milkman.model.OrderHistory;
@@ -29,6 +29,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OrderService {
@@ -48,29 +50,24 @@ public class OrderService {
     @Autowired
     public OrderEventPublisher orderEventPublisher;
 
+    private final CostCalculator costCalculator;
+
     LoggerService logger = LoggerService.getInstance();
+
+    public OrderService(CostCalculator costCalculator) {
+        this.costCalculator = costCalculator;
+    }
 
     public OrderEventPublisher getPublisher() {
         return this.orderEventPublisher;
-    }
-
-    public LoggerService getLogger() {
-        return this.logger;
     }
 
     public UUID processOrder(AbstractOrderProcessor processor) {
         return processor.execute();
     }
 
-    public OrderDTO getOrderById(UUID id) {
-        MilkOrder order = orderRepository.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + id));
-        return convertToOrderDTO(order);
-    }
-
     public MilkOrder getOrderByIdOrThrow(UUID orderId){
         return orderRepository.findById(orderId).orElseThrow(() -> new DetailedExceptionBuilder()
-                .withMessage("Invalid Order ID")
                 .withErrorCode("ORDER-404")
                 .withStatusCode(HttpStatus.NOT_FOUND)
                 .withType(ErrorType.BUSINESS)
@@ -81,23 +78,14 @@ public class OrderService {
     public void saveMilkmanCustomer(MilkmanCustomer mc){
         milkmanCustomerRepository.save(mc);
     }
-    public List<OrderDTO> getAllOrdersForCustomer(UUID customerId){
-        List<MilkOrder> customerOrders = orderRepository.findByMilkmanCustomer_Customer_Id(customerId);
-        return convertToOrderDTOs(customerOrders);
-    }
 
-    public List<OrderDTO> getAllOrdersForMilkman(UUID milkmanId){
-        List<MilkOrder> milkmanOrders = orderRepository.findByMilkmanCustomer_Milkman_Id(milkmanId);
-        return convertToOrderDTOs(milkmanOrders);
-    }
 
     public List<MilkOrderResponseDTO> getTodaysOrdersForMilkman(UUID milkmanId){
         try{
             return orderServiceDAO.getTodaysOrdersByMilkman(milkmanId);
         }catch(Exception ex){
             throw new DetailedExceptionBuilder()
-                    .withMessage("Error while fetching today's milk orders")
-                    .withErrorCode("ORDER-500")
+                    .withErrorCode("ORDER-TODAY-500")
                     .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                     .withType(ErrorType.SYSTEM)
                     .withDetails(ex.toString())
@@ -109,18 +97,7 @@ public class OrderService {
         return milkmanCustomerRepository
                 .findByMilkman_IdAndCustomer_Id(milkmanId, customerId)
                 .orElseThrow(() -> new DetailedExceptionBuilder()
-                        .withMessage("Milkman-customer association not found")
                         .withErrorCode("ASSOC-404")
-                        .withStatusCode(HttpStatus.NOT_FOUND)
-                        .withType(ErrorType.BUSINESS)
-                        .build());
-    }
-
-    public MilkOrder findOrderByIdOrThrow(UUID orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new DetailedExceptionBuilder()
-                        .withMessage("Order not found")
-                        .withErrorCode("ORDER-404")
                         .withStatusCode(HttpStatus.NOT_FOUND)
                         .withType(ErrorType.BUSINESS)
                         .build());
@@ -139,7 +116,6 @@ public class OrderService {
         } catch (DataAccessException dae) {
             logger.logError("DB failure while saving order: " + dae.getMessage());
             throw new DetailedExceptionBuilder()
-                    .withMessage("Unable to save order to database")
                     .withErrorCode("ORDER-DB-500")
                     .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                     .withType(ErrorType.DATABASE)
@@ -150,7 +126,7 @@ public class OrderService {
 
     @Transactional
     public UUID placeMilkOrder(MilkOrderRequestDTO milkOrder) {
-        return processOrder(new PlaceOrderProcessor(milkOrder, this));
+        return processOrder(new PlaceOrderProcessor(milkOrder, this, costCalculator));
     }
 
 
@@ -181,7 +157,6 @@ public class OrderService {
         }catch (Exception ex){
             logger.logError("Failed to update delivery status & history: " + ex.getMessage());
             throw new DetailedExceptionBuilder()
-                    .withMessage("Failed to update delivery status and history")
                     .withErrorCode("ORDER-HISTORY-500")
                     .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                     .withType(ErrorType.DATABASE)

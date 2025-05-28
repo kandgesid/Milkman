@@ -20,7 +20,6 @@ public abstract class AbstractOrderProcessor {
             throw ae;
         } catch (Exception e) {
             throw new DetailedExceptionBuilder()
-                    .withMessage("Order processing failed")
                     .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                     .withErrorCode("ORDER-TEMPLATE-500")
                     .withType(ErrorType.SYSTEM)

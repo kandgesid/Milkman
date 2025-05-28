@@ -18,21 +18,6 @@ public class HistoryController {
     @Autowired
     HistoryService historyService;
 
-//<<<<<<< Updated upstream
-//    @GetMapping("/milkman/getHistory/")
-//    ResponseEntity<?> getHistoryForMilkmanAndCutomer(@RequestParam(name = "customerId") UUID customerId,
-//                                                     @RequestParam(name = "milkmanId") UUID milkmanId,
-//                                                     @RequestParam(name = "toDate") String toDate,
-//                                                     @RequestParam(name = "fromDate") String fromDate) {
-//        try {
-//            List<MilkmanHistoryResponseDTO> result= historyService.getHistory(customerId, milkmanId, toDate, fromDate);
-//            System.out.println(result.size());
-//            return ResponseEntity.ok(result);
-//        }catch (Exception ex){
-//            System.out.println(ex.getMessage());
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex);
-//        }
-//=======
     @PostMapping ("/milkman/getHistory/")
     ResponseEntity<?> getHistoryForMilkmanAndCutomer(@RequestBody HistoryRequestDTO request) {
 
@@ -42,7 +27,5 @@ public class HistoryController {
 //            return ResponseEntity.ok(result);
         List<MilkmanHistoryResponseDTO> report = historyService.generateHistoryReport(request);
         return ResponseEntity.ok(report);
-
-//>>>>>>> Stashed changes
     }
 }

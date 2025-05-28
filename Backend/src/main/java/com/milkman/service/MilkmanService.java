@@ -1,5 +1,6 @@
 package com.milkman.service;
 
+import com.milkman.Adapter.DtoEntityAdapter;
 import com.milkman.DTO.*;
 import com.milkman.model.Customer;
 import com.milkman.model.Milkman;
@@ -23,6 +24,14 @@ public class MilkmanService {
     @Autowired
     private MilkmanCustomerRepository milkmanCustomerRepository;
 
+    private final DtoEntityAdapter<MilkmanInfoDTO, MilkmanCustomer> milkmanInfoDtoEntityAdapter;
+    private final DtoEntityAdapter<MilkmanDTO, Milkman> milkmanDtoEntityAdapter;
+
+    public MilkmanService(DtoEntityAdapter<MilkmanInfoDTO, MilkmanCustomer> milkmanInfoDtoEntityAdapter, DtoEntityAdapter<MilkmanDTO, Milkman> milkmanDtoEntityAdapter) {
+        this.milkmanInfoDtoEntityAdapter = milkmanInfoDtoEntityAdapter;
+        this.milkmanDtoEntityAdapter = milkmanDtoEntityAdapter;
+    }
+
     public List<Milkman> getAllMilkman() {
         return milkmanRepository.findAll();
     }
@@ -36,17 +45,7 @@ public class MilkmanService {
         Milkman milkman =  milkmanRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Milkman not found"));
 
-        return toMilkmanDto(milkman);
-    }
-
-    private MilkmanDTO toMilkmanDto(Milkman milkman) {
-        MilkmanDTO dto = new MilkmanDTO();
-        dto.setId(milkman.getId());
-        dto.setName(milkman.getName());
-        dto.setEmail(milkman.getEmail());
-        dto.setAddress(milkman.getAddress());
-        dto.setPhoneNumber(milkman.getPhoneNumber());
-        return dto;
+        return milkmanDtoEntityAdapter.toDto(milkman);
     }
     
     public Milkman createMilkman(Milkman milkman) {
@@ -97,19 +96,7 @@ public class MilkmanService {
     public List<MilkmanInfoDTO> getAllMilkmanForCustomer(UUID id) {
         List<MilkmanCustomer>  result =  milkmanCustomerRepository.findByCustomer_Id(id);
         return result.stream()
-                .map(this::toDto)
+                .map(milkmanInfoDtoEntityAdapter::toDto)
                 .toList();
-    }
-
-    private MilkmanInfoDTO toDto(MilkmanCustomer mc) {
-        MilkmanInfoDTO dto = new MilkmanInfoDTO();
-        dto.setId(mc.getMilkman().getId());
-        dto.setName(mc.getMilkman().getName());
-        dto.setEmail(mc.getMilkman().getEmail());
-        dto.setPhoneNumber(mc.getMilkman().getPhoneNumber());
-        dto.setAddress(mc.getMilkman().getAddress());
-        dto.setMilkRate(mc.getMilkRate());
-        dto.setDueAmount(mc.getDueAmount());
-        return dto;
     }
 } 

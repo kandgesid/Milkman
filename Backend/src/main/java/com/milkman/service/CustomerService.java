@@ -1,12 +1,16 @@
 package com.milkman.service;
 
 
-import com.milkman.DTO.*;
+import com.milkman.Adapter.CustomerDTOResponseAdaptor;
+import com.milkman.Adapter.DtoEntityAdapter;
+import com.milkman.Adapter.MyOrderResAdapter;
+import com.milkman.Billing.Decorator.CostCalculator;
+import com.milkman.DTO.CustomerDTO;
 import com.milkman.DTO.CustomerInfoDTO;
 import com.milkman.DTO.MyOrdersResDTO;
+import com.milkman.DTO.UpdateMyOrderReqDTO;
 import com.milkman.exception.CustomerNotFoundException;
 import com.milkman.exception.DetailedExceptionBuilder;
-
 import com.milkman.model.Customer;
 import com.milkman.model.MilkOrder;
 import com.milkman.model.MilkmanCustomer;
@@ -19,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +38,23 @@ public class CustomerService {
     @Autowired
     OrderRepository orderRepository;
 
+    private final DtoEntityAdapter<CustomerDTO, Customer> customerDTOResponseAdaptor;
+    private final DtoEntityAdapter<MyOrdersResDTO, MilkOrder> myOrdersResDTOResponseAdaptor;
+    private final DtoEntityAdapter<CustomerInfoDTO, MilkmanCustomer> customerInfoDTOResponseAdaptor;
+
+    private final CostCalculator costCalculator;
+
+
+
+    public CustomerService(CustomerDTOResponseAdaptor customerDTOResponseAdaptor,
+                           DtoEntityAdapter<MyOrdersResDTO, MilkOrder> myOrderResponseAdaptor,
+                           DtoEntityAdapter<CustomerInfoDTO, MilkmanCustomer> customerInfoDTOResponseAdaptor, CostCalculator costCalculator) {
+        this.customerDTOResponseAdaptor = customerDTOResponseAdaptor;
+        this.myOrdersResDTOResponseAdaptor = myOrderResponseAdaptor;
+        this.customerInfoDTOResponseAdaptor = customerInfoDTOResponseAdaptor;
+        this.costCalculator = costCalculator;
+    }
+
     public List<Customer> getAllCustomers(){
         return customerRepository.findAll();
     }
@@ -43,19 +63,7 @@ public class CustomerService {
     public CustomerDTO getCustomerById(final UUID customerId){
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(customerId));
-        return toCustomerDto(customer);
-    }
-
-    private CustomerDTO toCustomerDto(Customer customer) {
-        CustomerDTO dto = new CustomerDTO();
-        dto.setId(customer.getId());
-        dto.setName(customer.getName());
-        dto.setEmail(customer.getEmail());
-        dto.setPhoneNumber(customer.getPhoneNumber());
-        dto.setAddress(customer.getAddress());
-        dto.setFamilySize(customer.getFamilySize());
-        dto.setDefaultMilkQty(customer.getDefaultMilkQty());
-        return dto;
+        return customerDTOResponseAdaptor.toDto(customer);
     }
 
     public List<Customer> getCustomerByPhoneNumber(final String phone){
@@ -65,11 +73,10 @@ public class CustomerService {
     public List<CustomerInfoDTO> getAllCustomersForMilkman(UUID milkmanId){
         try {
             List<MilkmanCustomer> result = milkmanCustomerRepository.findByMilkman_Id(milkmanId);
-            return result.stream().map(this::toDto).toList();
+            return result.stream().map(customerInfoDTOResponseAdaptor::toDto).toList();
         } catch (Exception ex) {
             throw new DetailedExceptionBuilder()
-                    .withMessage("Failed to fetch customers for milkman")
-                    .withErrorCode("CUST-MILKMAN-500")
+                    .withErrorCode("CUSTOMER-MILKMAN-500")
                     .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
                     .withType(ErrorType.SYSTEM)
                     .withDetails(ex.getMessage())
@@ -81,7 +88,7 @@ public class CustomerService {
         List<MilkmanCustomer> links = milkmanCustomerRepository.findByCustomer_Id(customerId);
         return milkmanCustomerRepository.findByCustomer_Id(customerId).stream()
                 .flatMap(mc -> orderRepository.findByMilkmanCustomer(mc).stream())
-                .map(this::toMyOrderDto)
+                .map(myOrdersResDTOResponseAdaptor::toDto)
                 .toList();
     }
 
@@ -90,10 +97,9 @@ public class CustomerService {
             MilkOrder order =  orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
             if(request.getRequestedQuantity() != order.getQuantity()){
                 MilkmanCustomer mc = order.getMilkmanCustomer();
-                double currQyt = order.getQuantity();
-                double currAmt = order.getRate() * currQyt;
+                double currAmt = order.getAmount();
                 double newQyt = request.getRequestedQuantity();
-                double newAmt = order.getRate() * newQyt;
+                double newAmt = costCalculator.calculateCost(newQyt, order.getRate());
                 double updatedAmt = mc.getDueAmount() - currAmt + newAmt;
                 mc.setDueAmount(updatedAmt);
                 mc.setLastUpdated(LocalDateTime.now());
@@ -130,8 +136,7 @@ public class CustomerService {
         try{
             MilkOrder order =  orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
             MilkmanCustomer mc = order.getMilkmanCustomer();
-            double currQyt = order.getQuantity();
-            double currAmt = order.getRate() * currQyt;
+            double currAmt = order.getAmount();
             double updatedAmt = mc.getDueAmount() - currAmt;
             mc.setDueAmount(updatedAmt);
             mc.setLastUpdated(LocalDateTime.now());
@@ -141,34 +146,6 @@ public class CustomerService {
             throw new RuntimeException("Error while deleting my order", e);
         }
 
-    }
-
-    private MyOrdersResDTO toMyOrderDto(MilkOrder order) {
-        MyOrdersResDTO dto = new MyOrdersResDTO();
-        dto.setOrderId(order.getId());
-        dto.setMilkmanCustomerId(order.getMilkmanCustomer().getId());
-        dto.setMilkmanName(order.getMilkmanCustomer().getMilkman().getName());
-        dto.setOrderDate(order.getOrderDate());
-        dto.setRate(order.getRate());
-        dto.setAmount(order.getAmount());
-        dto.setQuantity(order.getQuantity());
-        dto.setStatus(order.getStatus());
-        dto.setNote(order.getNote());
-        return dto;
-    }
-
-    private CustomerInfoDTO toDto(MilkmanCustomer mc) {
-        CustomerInfoDTO dto = new CustomerInfoDTO();
-        dto.setId(mc.getCustomer().getId());
-        dto.setName(mc.getCustomer().getName());
-        dto.setEmail(mc.getCustomer().getEmail());
-        dto.setPhoneNumber(mc.getCustomer().getPhoneNumber());
-        dto.setAddress(mc.getCustomer().getAddress());
-        dto.setFamilySize(mc.getCustomer().getFamilySize());
-        dto.setDefaultMilkQty(mc.getCustomer().getDefaultMilkQty());
-        dto.setMilkRate(mc.getMilkRate());
-        dto.setDueAmount(mc.getDueAmount());
-        return dto;
     }
 
 }
