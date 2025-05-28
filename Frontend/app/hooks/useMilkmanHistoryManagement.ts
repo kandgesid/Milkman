@@ -14,13 +14,11 @@ const useMilkmanHistoryManagement = () => {
       // Format the dates using the utility function
       const formattedData = {
         ...data,
-        toDate: formatDateForAPI(data.toDate),
-        fromDate: formatDateForAPI(data.fromDate)
+        toDate: data.toDate ? formatDateForAPI(data.toDate) : '',
+        fromDate: data.fromDate ? formatDateForAPI(data.fromDate) : ''
       };
       
-      const response = await instance.get(`${API_URL}/api/history/milkman/getHistory/`, {
-        params: formattedData
-      });
+      const response = await instance.post(`${API_URL}/api/history/milkman/getHistory/`, formattedData);
       
       if(response.status === 200 && response.data) {
         Alert.alert('Success', 'History retrieved successfully');

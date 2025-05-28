@@ -23,6 +23,7 @@ export default function CustomerHistoryScreen() {
   const [historyData, setHistoryData] = useState<MilkmanHistory[]>([]);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [strategy, setStrategy] = useState<'MONTHLY' | 'CUSTOM'>('MONTHLY');
   const theme = useTheme();
   const { handleGetHistory } = useMilkmanHistoryManagement();
   const [displayedItems, setDisplayedItems] = useState<MilkmanHistory[]>([]);
@@ -146,17 +147,20 @@ export default function CustomerHistoryScreen() {
       milkmanId,
       customerId,
       fromDate,
-      toDate
+      toDate,
+      strategy
     });
     const historyData: getHistoryData = {
       customerId: customerId as string,
       milkmanId: milkmanId as string,
-      fromDate: formatDateToLocalTimezone(fromDate),
-      toDate: formatEndOfDayDateToLocalTimezone(toDate)
+      strategy,
+      ...(strategy === 'CUSTOM' && {
+        fromDate: formatDateToLocalTimezone(fromDate),
+        toDate: formatEndOfDayDateToLocalTimezone(toDate)
+      })
     };
     const result = await handleGetHistory(historyData);
     setHistoryData(result);
-    // Update to use filteredHistory instead of result directly
     setDisplayedItems(filteredHistory.slice(0, ITEMS_PER_PAGE));
     setCurrentPage(1);
   };
@@ -369,7 +373,9 @@ export default function CustomerHistoryScreen() {
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
             <Text style={styles.headerTitle}>Delivery Statement</Text>
-            <Text style={styles.headerSubtitle}>Period: {formatDateForDisplay(fromDate)} - {formatDateForDisplay(toDate)}</Text>
+            <Text style={styles.headerSubtitle}>
+              {strategy === 'MONTHLY' ? 'Monthly Statement' : `Period: ${formatDateForDisplay(fromDate)} - ${formatDateForDisplay(toDate)}`}
+            </Text>
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.totalAmount}>Total Amount</Text>
@@ -420,6 +426,44 @@ export default function CustomerHistoryScreen() {
     </View>
   );
 
+  const renderStrategyOptions = () => (
+    <View style={styles.strategyContainer}>
+      <Text style={styles.strategyTitle}>Select Statement Type</Text>
+      <View style={styles.strategyButtons}>
+        <Button
+          mode={strategy === 'MONTHLY' ? "contained" : "outlined"}
+          onPress={() => setStrategy('MONTHLY')}
+          style={[
+            styles.strategyButton,
+            strategy === 'MONTHLY' && styles.activeStrategyButton
+          ]}
+          labelStyle={[
+            styles.strategyButtonLabel,
+            strategy === 'MONTHLY' && styles.activeStrategyButtonLabel
+          ]}
+          icon="calendar-month"
+        >
+          Monthly
+        </Button>
+        <Button
+          mode={strategy === 'CUSTOM' ? "contained" : "outlined"}
+          onPress={() => setStrategy('CUSTOM')}
+          style={[
+            styles.strategyButton,
+            strategy === 'CUSTOM' && styles.activeStrategyButton
+          ]}
+          labelStyle={[
+            styles.strategyButtonLabel,
+            strategy === 'CUSTOM' && styles.activeStrategyButtonLabel
+          ]}
+          icon="calendar-range"
+        >
+          Custom
+        </Button>
+      </View>
+    </View>
+  );
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -447,36 +491,40 @@ export default function CustomerHistoryScreen() {
             {renderCustomerDetails()}
 
             <View style={styles.formContainer}>
-              <View style={styles.datePickerContainer}>
-                <View style={styles.datePickerRow}>
-                  <View style={styles.datePickerColumn}>
-                    <Text style={styles.label}>From Date</Text>
-                    <Button
-                      mode="outlined"
-                      onPress={() => setShowFromDatePicker(true)}
-                      style={styles.dateButton}
-                      icon="calendar"
-                      textColor="#000000"
-                      labelStyle={styles.dateButtonLabel}
-                    >
-                      {fromDate ? formatDateForDisplay(fromDate) : 'Select Date'}
-                    </Button>
-                  </View>
-                  <View style={styles.datePickerColumn}>
-                    <Text style={styles.label}>To Date</Text>
-                    <Button
-                      mode="outlined"
-                      onPress={() => setShowToDatePicker(true)}
-                      style={styles.dateButton}
-                      icon="calendar"
-                      textColor="#000000"
-                      labelStyle={styles.dateButtonLabel}
-                    >
-                      {toDate ? formatDateForDisplay(toDate) : 'Select Date'}
-                    </Button>
+              {renderStrategyOptions()}
+              
+              {strategy === 'CUSTOM' && (
+                <View style={styles.datePickerContainer}>
+                  <View style={styles.datePickerRow}>
+                    <View style={styles.datePickerColumn}>
+                      <Text style={styles.label}>From Date</Text>
+                      <Button
+                        mode="outlined"
+                        onPress={() => setShowFromDatePicker(true)}
+                        style={styles.dateButton}
+                        icon="calendar"
+                        textColor="#000000"
+                        labelStyle={styles.dateButtonLabel}
+                      >
+                        {fromDate ? formatDateForDisplay(fromDate) : 'Select Date'}
+                      </Button>
+                    </View>
+                    <View style={styles.datePickerColumn}>
+                      <Text style={styles.label}>To Date</Text>
+                      <Button
+                        mode="outlined"
+                        onPress={() => setShowToDatePicker(true)}
+                        style={styles.dateButton}
+                        icon="calendar"
+                        textColor="#000000"
+                        labelStyle={styles.dateButtonLabel}
+                      >
+                        {toDate ? formatDateForDisplay(toDate) : 'Select Date'}
+                      </Button>
+                    </View>
                   </View>
                 </View>
-              </View>
+              )}
 
               <Button
                 mode="contained"
@@ -1062,5 +1110,38 @@ const styles = StyleSheet.create({
   buttonLabel: {
     color: '#000000',
     fontSize: 14,
+  },
+  strategyContainer: {
+    marginBottom: 16,
+  },
+  strategyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  strategyButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  strategyButton: {
+    flex: 1,
+    borderColor: '#1976D2',
+    borderWidth: 1,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    height: 48,
+    justifyContent: 'center',
+  },
+  activeStrategyButton: {
+    backgroundColor: '#1976D2',
+  },
+  strategyButtonLabel: {
+    color: '#000000',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  activeStrategyButtonLabel: {
+    color: '#FFFFFF',
   },
 }); 

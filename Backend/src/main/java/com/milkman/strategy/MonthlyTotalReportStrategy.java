@@ -22,7 +22,7 @@ public class MonthlyTotalReportStrategy implements OrderReportStrategy{
     @Override
     public List<MilkmanHistoryResponseDTO> generateReport() {
         LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
-        LocalDate endOfMonth = startOfMonth.plusMonths(1).minusDays(1);
+        LocalDate endOfMonth = startOfMonth.plusMonths(1);
         return historyServiceDAO.getHistoryForGivenMilkmanAndCustomer(milkmanId, customerId, startOfMonth, endOfMonth);
     }
 

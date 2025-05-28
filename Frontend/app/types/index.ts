@@ -86,8 +86,9 @@ export interface newOrder {
 export interface getHistoryData {
   customerId: string;
   milkmanId: string;
-  toDate: Date;
-  fromDate: Date;
+  toDate?: Date;
+  fromDate?: Date;
+  strategy: 'MONTHLY' | 'CUSTOM';
 }
 
 export interface newCustomer {
