@@ -46,6 +46,23 @@ export interface Order{
     customerAddress: string;
 }
 
+export interface MyComplaint{
+  id: string;
+  milkmanId: string;
+  milkmanName: string;
+  description: string;
+  status: string;
+  category: string;
+  complaintDate: string;
+}
+
+export interface newComplaint {
+  milkmanId: string;
+  customerId: string;
+  description: string;
+  category: string;
+}
+
 export interface MyOrder{
     milkmanCustomerId: string;
     orderId: string;

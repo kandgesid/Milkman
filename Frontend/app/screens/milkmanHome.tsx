@@ -148,7 +148,7 @@ export default function MilkManHomeScreen() {
       >
         <View style={styles.container}>
           <Appbar.Header style={styles.appbar}>
-            <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} />
+            <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} color="#000000" />
             <Appbar.Content title="My Customers" titleStyle={styles.appbarTitle} />
             <View style={styles.headerActions}>
               <Appbar.Action 
@@ -157,7 +157,7 @@ export default function MilkManHomeScreen() {
                 style={styles.addButton}
                 color="#1976D2"
               />
-              <Appbar.Action icon="logout" onPress={handleLogoutButton} />
+              <Appbar.Action icon="logout" onPress={handleLogoutButton} color="#000000" />
             </View>
           </Appbar.Header>
 

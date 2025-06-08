@@ -1,17 +1,23 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "~/*": ["./app/*"]
+      "@/*": [
+        "./*"
+      ],
+      "~/*": [
+        "./app/*"
+      ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "app/screens/milkmanHome.tsx"  ]
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ]
 }

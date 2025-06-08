@@ -164,9 +164,9 @@ export default function TodaysOrderScreen() {
         >
           <View style={styles.container}>
             <Appbar.Header style={styles.appbar}>
-              <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} />
+              <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} color="#000000" />
               <Appbar.Content title="Today's Order" titleStyle={styles.appbarTitle} />
-              <Appbar.Action icon="logout" onPress={handleLogoutButton} />
+              <Appbar.Action icon="logout" onPress={handleLogoutButton} color="#000000" />
             </Appbar.Header>
 
             {/* Animated Table Container */}

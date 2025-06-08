@@ -103,6 +103,13 @@ export default function CustomerHomeScreen() {
             theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
           />
           <Drawer.Item
+            label="My Raised Complaints"
+            icon="alert-circle"
+            onPress={() => router.push(`/screens/myComplaints?id=${userId}`)}
+            style={styles.drawerItem}
+            theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
+          />
+          <Drawer.Item
             label="Settings"
             icon="cog"
             onPress={() => router.push(`/screens/customerSettings?id=${userId}`)}
@@ -129,9 +136,9 @@ export default function CustomerHomeScreen() {
       >
         <View style={styles.container}>
           <Appbar.Header style={styles.appbar}>
-            <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} />
+            <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} color="#000000" />
             <Appbar.Content title="My Milkmans" titleStyle={styles.appbarTitle} />
-            <Appbar.Action icon="logout" onPress={handleLogoutButton} />
+            <Appbar.Action icon="logout" onPress={handleLogoutButton} color="#000000" />
           </Appbar.Header>
 
           <ScrollView style={styles.scrollView}>
@@ -357,15 +364,31 @@ export default function CustomerHomeScreen() {
                   </View>
 
                   <View style={styles.cardActions}>
-                    <Button
-                      mode="contained"
-                      onPress={() => handlePlaceOrder(selectedMilkman.id?.toString() || '', userId || '')}
-                      style={styles.orderButton}
-                      labelStyle={styles.orderButtonLabel}
-                      icon="cart"
-                    >
-                      Place Order
-                    </Button>
+                    <View style={styles.actionButtonsContainer}>
+                      <Button
+                        mode="contained"
+                        onPress={() => handlePlaceOrder(selectedMilkman.id?.toString() || '', userId || '')}
+                        style={[styles.actionButton, styles.orderButton]}
+                        labelStyle={styles.actionButtonLabel}
+                        icon="cart"
+                        contentStyle={styles.buttonContent}
+                      >
+                        Place Order
+                      </Button>
+                      <Button
+                        mode="outlined"
+                        onPress={() => router.push({
+                          pathname: '/screens/raiseComplaint',
+                          params: { milkmanId: selectedMilkman.id, customerId: userId }
+                        })}
+                        style={[styles.actionButton, styles.complaintButton]}
+                        labelStyle={[styles.actionButtonLabel, styles.complaintButtonLabel]}
+                        icon="alert-circle"
+                        contentStyle={styles.buttonContent}
+                      >
+                        Raise Complaint
+                      </Button>
+                    </View>
                   </View>
                 </View>
               )}
@@ -613,16 +636,31 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
   },
-  orderButton: {
-    backgroundColor: '#1976D2',
+  actionButtonsContainer: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  actionButton: {
     borderRadius: 8,
-    paddingVertical: 8,
     elevation: 2,
   },
-  orderButtonLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    paddingVertical: 4,
+  buttonContent: {
+    height: 44,
+  },
+  actionButtonLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  orderButton: {
+    backgroundColor: '#1976D2',
+  },
+  complaintButton: {
+    borderColor: '#1976D2',
+    borderWidth: 1.5,
+  },
+  complaintButtonLabel: {
+    color: '#1976D2',
   },
   drawerContainer: {
     flex: 1,

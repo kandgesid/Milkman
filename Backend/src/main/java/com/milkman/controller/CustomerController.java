@@ -1,11 +1,10 @@
 package com.milkman.controller;
 
-import com.milkman.DTO.CustomerDTO;
-import com.milkman.DTO.MilkmanInfoDTO;
-import com.milkman.DTO.MyOrdersResDTO;
-import com.milkman.DTO.UpdateMyOrderReqDTO;
+import com.milkman.DTO.*;
+import com.milkman.model.Complaint;
 import com.milkman.model.Customer;
 import com.milkman.model.MilkOrder;
+import com.milkman.service.ComplaintService;
 import com.milkman.service.CustomerService;
 import com.milkman.service.MilkmanService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,8 @@ public class CustomerController {
     CustomerService customerService;
     @Autowired
     private MilkmanService milkmanService;
+    @Autowired
+    private ComplaintService complaintService;
 
     @GetMapping("/")
     ResponseEntity<?> getAllCustomer(){
@@ -44,6 +45,12 @@ public class CustomerController {
     @GetMapping("/myMilkmans/{id}")
     ResponseEntity<?> getAllMilkmanForCustomer(@PathVariable UUID id){
         List<MilkmanInfoDTO> res = milkmanService.getAllMilkmanForCustomer(id);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/myComplaints/{id}")
+    ResponseEntity<?> getMyComplaints(@PathVariable UUID id){
+        List<MyComplaintsResDTO> res = complaintService.getComplaintsByCustomerId(id);
         return ResponseEntity.ok(res);
     }
 

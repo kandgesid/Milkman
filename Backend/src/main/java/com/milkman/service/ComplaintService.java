@@ -1,8 +1,10 @@
 package com.milkman.service;
 
 
+import com.milkman.Adapter.DtoEntityAdapter;
 import com.milkman.DTO.ComplaintActionDTO;
 import com.milkman.DTO.ComplaintRequestDTO;
+import com.milkman.DTO.MyComplaintsResDTO;
 import com.milkman.exception.ComplaintNotFoundException;
 import com.milkman.exception.CustomerNotFoundException;
 import com.milkman.exception.MilkmanNotFoundException;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,11 +36,23 @@ public class ComplaintService {
     @Autowired
     ComplaintRepository complaintRepository;
 
+    private final DtoEntityAdapter<MyComplaintsResDTO, Complaint> myComplaintsResDTOComplaintDtoEntityAdapter;
+
+    public ComplaintService(DtoEntityAdapter<MyComplaintsResDTO, Complaint> myComplaintsResDTOComplaintDtoEntityAdapter) {
+        this.myComplaintsResDTOComplaintDtoEntityAdapter = myComplaintsResDTOComplaintDtoEntityAdapter;
+    }
+
 
     Complaint getComplaintById(UUID id){
         Complaint complaint = complaintRepository.findById(id).
                 orElseThrow(() -> new ComplaintNotFoundException(id));
         return complaint;
+    }
+
+    public List<MyComplaintsResDTO> getComplaintsByCustomerId(UUID id){
+         return complaintRepository.findByCustomerId(id)
+                 .stream()
+                 .map(myComplaintsResDTOComplaintDtoEntityAdapter::toDto).toList();
     }
 
 

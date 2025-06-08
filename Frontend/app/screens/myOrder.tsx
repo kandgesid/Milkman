@@ -188,6 +188,13 @@ export default function MyOrderScreen() {
             theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
           />
           <Drawer.Item
+            label="My Raised Complaints"
+            icon="alert-circle"
+            onPress={() => router.push(`/screens/myComplaints?id=${userId}`)}
+            style={styles.drawerItem}
+            theme={{ colors: { onSurfaceVariant: '#000000', onSurface: '#000000' } }}
+          />
+          <Drawer.Item
             label="Settings"
             icon="cog"
             onPress={() => {}}
@@ -285,9 +292,9 @@ export default function MyOrderScreen() {
       >
         <View style={styles.container}>
           <Appbar.Header style={styles.appbar}>
-            <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} />
+            <Appbar.Action icon="menu" onPress={() => drawerRef.current?.openDrawer()} color="#000000" />
             <Appbar.Content title="My Orders" titleStyle={styles.appbarTitle} />
-            <Appbar.Action icon="logout" onPress={handleLogoutButton} />
+            <Appbar.Action icon="logout" onPress={handleLogoutButton} color="#000000" />
           </Appbar.Header>
 
           <ScrollView style={styles.scrollView}>
